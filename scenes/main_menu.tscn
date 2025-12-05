@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3 uid="uid://b4d3q7ybw8xqy"]
+
+[ext_resource type="Script" uid="uid://dd1357fybtlw6" path="res://scripts/main_menu.gd" id="1_1n7cy"]
+[ext_resource type="Texture2D" uid="uid://7yekx1gn2x1n" path="res://assets/background/Menu.png" id="2_ekxnf"]
+
+[node name="MainMenu" type="Node"]
+script = ExtResource("1_1n7cy")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 30
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 64
+text = "LETHAL LEAGUE"
+horizontal_alignment = 1
+
+[node name="PlayButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "JUGAR"
+
+[node name="QuitButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "SALIR"
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 1285.0
+offset_bottom = 720.0
+texture = ExtResource("2_ekxnf")
+expand_mode = 1
+stretch_mode = 6
+
+[connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]

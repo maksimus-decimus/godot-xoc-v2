@@ -1,0 +1,216 @@
+[gd_scene load_steps=4 format=3 uid="uid://cfmxyv0pq1xr6"]
+
+[ext_resource type="Script" uid="uid://bgdrujfs8u5yg" path="res://scripts/character_select.gd" id="1_a4vsy"]
+[ext_resource type="Texture2D" uid="uid://cjt4sgggyl2kb" path="res://assets/players/don_quixote/Donquixote_placeholder.png" id="2_donquixote"]
+[ext_resource type="Texture2D" uid="uid://dbv62y6cg0y6b" path="res://assets/players/ishmael/Ishmael_placeholder.png" id="2_ishmael"]
+
+[node name="CharacterSelect" type="Node"]
+script = ExtResource("1_a4vsy")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1280.0
+offset_bottom = 720.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.1, 0.25, 1)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="TitleLabel" type="Label" parent="CanvasLayer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 50.0
+offset_bottom = 100.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 48
+text = "SELECCIÓN DE PERSONAJE"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -150.0
+offset_right = 400.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(1.077607, 1.047244)
+theme_override_constants/separation = 100
+
+[node name="P1Panel" type="Panel" parent="CanvasLayer/HBoxContainer"]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/HBoxContainer/P1Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.99175
+offset_top = -46.31203
+offset_right = 12.99176
+offset_bottom = 27.687958
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.88529474, 0.8917216)
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="P1Label" type="Label" parent="CanvasLayer/HBoxContainer/P1Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "JUGADOR 1: Selecciona"
+horizontal_alignment = 1
+
+[node name="Char1Button" type="TextureRect" parent="CanvasLayer/HBoxContainer/P1Panel/VBoxContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_donquixote")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/P1Panel/VBoxContainer/Char1Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 16
+text = "DON QUIXOTE"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="Char2Button" type="TextureRect" parent="CanvasLayer/HBoxContainer/P1Panel/VBoxContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_ishmael")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/P1Panel/VBoxContainer/Char2Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 16
+text = "ISHMAEL"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="P2Panel" type="Panel" parent="CanvasLayer/HBoxContainer"]
+custom_minimum_size = Vector2(300, 335.375)
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/HBoxContainer/P2Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.807969
+offset_top = -35.808273
+offset_right = 14.807983
+offset_bottom = 12.221741
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.8942331, 0.915048)
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="P2Label" type="Label" parent="CanvasLayer/HBoxContainer/P2Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "JUGADOR 2: Selecciona"
+horizontal_alignment = 1
+
+[node name="Char1Button" type="TextureRect" parent="CanvasLayer/HBoxContainer/P2Panel/VBoxContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_donquixote")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/P2Panel/VBoxContainer/Char1Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1.3204212
+offset_top = 21.308884
+offset_right = -1.3204193
+offset_bottom = 21.308884
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 16
+text = "DON QUIXOTE"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="Char2Button" type="TextureRect" parent="CanvasLayer/HBoxContainer/P2Panel/VBoxContainer"]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_ishmael")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="CanvasLayer/HBoxContainer/P2Panel/VBoxContainer/Char2Button"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 6.9815044
+offset_top = 24.5362
+offset_right = 6.9815063
+offset_bottom = 24.536194
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 16
+text = "ISHMAEL"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="InstructionsLabel" type="Label" parent="CanvasLayer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -100.0
+offset_right = 300.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+text = "P1: W/S + ESPACIO | P2: FLECHAS + ENTER"
+horizontal_alignment = 1
+
+[node name="ContinueButton" type="Button" parent="CanvasLayer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -100.0
+offset_top = -150.0
+offset_right = 100.0
+offset_bottom = -110.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = "CONTINUAR"
+
+[connection signal="pressed" from="CanvasLayer/ContinueButton" to="." method="_on_continue_button_pressed"]

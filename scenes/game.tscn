@@ -1,0 +1,172 @@
+[gd_scene load_steps=13 format=3 uid="uid://c3kq45y0o6jlw"]
+
+[ext_resource type="Script" uid="uid://uto7ou36b7yl" path="res://scripts/game_manager.gd" id="1_f5vmu"]
+[ext_resource type="Script" uid="uid://bsgf5nbf6qoyv" path="res://scripts/player.gd" id="2_b7xqo"]
+[ext_resource type="Texture2D" uid="uid://ct0beb5g4pgrk" path="res://assets/background/Stage_1.png" id="2_gee14"]
+[ext_resource type="Texture2D" path="res://assets/players/don_quixote/sprites/idle.png" id="2_preview"]
+[ext_resource type="Script" uid="uid://doy5hsbkhii0i" path="res://scripts/ball.gd" id="3_dkw5c"]
+[ext_resource type="PackedScene" uid="uid://cy1i6pbfawc4k" path="res://scenes/ui/hud.tscn" id="4_pj8yw"]
+[ext_resource type="AudioStream" uid="uid://b21x1nqml55mq" path="res://sound/sfx/golpe/weak_hit.wav" id="5_weak"]
+[ext_resource type="AudioStream" uid="uid://dmyi14f31qcbd" path="res://sound/sfx/golpe/medium_hit.wav" id="6_medium"]
+[ext_resource type="AudioStream" uid="uid://dr4j8g66vu5u0" path="res://sound/sfx/golpe/strong_hit.wav" id="7_strong"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(64, 80)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
+size = Vector2(76.111115, 87)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
+radius = 16.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(1280, 40)
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_f5vmu")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+
+[node name="TextureRect" type="TextureRect" parent="."]
+offset_right = 1284.0
+offset_bottom = 869.0
+texture = ExtResource("2_gee14")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Player1" type="CharacterBody2D" parent="." groups=["players"]]
+position = Vector2(200, 360)
+collision_mask = 14
+script = ExtResource("2_b7xqo")
+
+[node name="VisualContainer" type="Node2D" parent="Player1"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Player1/VisualContainer"]
+texture = ExtResource("2_preview")
+position = Vector2(0, 0)
+scale = Vector2(0.5, 0.5)
+
+[node name="ColorRect" type="ColorRect" parent="Player1/VisualContainer"]
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+color = Color(1, 0, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player1"]
+position = Vector2(0, 8)
+shape = SubResource("RectangleShape2D_player")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player1"]
+
+[node name="HitArea" type="Area2D" parent="Player1"]
+collision_layer = 8
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player1/HitArea"]
+position = Vector2(-2.0999908, 3.5)
+scale = Vector2(1.08, 1)
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="HitIndicator" type="ColorRect" parent="Player1/HitArea"]
+visible = false
+modulate = Color(1, 1, 0, 0)
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Player2" type="CharacterBody2D" parent="." groups=["players"]]
+position = Vector2(1080, 360)
+collision_mask = 14
+script = ExtResource("2_b7xqo")
+player_id = 2
+
+[node name="VisualContainer" type="Node2D" parent="Player2"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Player2/VisualContainer"]
+texture = ExtResource("2_preview")
+visible = false
+position = Vector2(0, 0)
+scale = Vector2(0.5, 0.5)
+
+[node name="ColorRect" type="ColorRect" parent="Player2/VisualContainer"]
+offset_left = -32.0
+offset_top = -32.0
+offset_right = 32.0
+offset_bottom = 32.0
+color = Color(0, 0.5, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player2"]
+shape = SubResource("RectangleShape2D_player")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player2"]
+
+[node name="HitArea" type="Area2D" parent="Player2"]
+collision_layer = 8
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player2/HitArea"]
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="HitIndicator" type="ColorRect" parent="Player2/HitArea"]
+visible = false
+modulate = Color(1, 1, 0, 0)
+offset_left = -40.0
+offset_top = -40.0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Ball" type="CharacterBody2D" parent="."]
+position = Vector2(640, 360)
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("3_dkw5c")
+
+[node name="ColorRect" type="ColorRect" parent="Ball"]
+offset_left = -16.0
+offset_top = -16.0
+offset_right = 16.0
+offset_bottom = 16.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ball"]
+shape = SubResource("CircleShape2D_ball")
+
+[node name="WeakSound" type="AudioStreamPlayer" parent="Ball"]
+stream = ExtResource("5_weak")
+
+[node name="MediumSound" type="AudioStreamPlayer" parent="Ball"]
+stream = ExtResource("6_medium")
+
+[node name="StrongSound" type="AudioStreamPlayer" parent="Ball"]
+stream = ExtResource("7_strong")
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="TopWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(640, -20)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Floor" type="CollisionShape2D" parent="Walls"]
+position = Vector2(640, 650)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-20, 360)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1300, 360)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="CanvasLayer" instance=ExtResource("4_pj8yw")]
+offset_right = -17.0
