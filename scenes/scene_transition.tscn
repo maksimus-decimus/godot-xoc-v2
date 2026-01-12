@@ -1,6 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://cxqw8y7p6qr2u"]
 
 [ext_resource type="Script" path="res://scripts/scene_transition.gd" id="1_1"]
+[ext_resource type="Texture2D" path="res://assets/msc/cargar.png" id="2_loading"]
 
 [sub_resource type="Animation" id="Animation_1"]
 resource_name = "fade_in"
@@ -111,6 +112,7 @@ grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
 [node name="LoadingLabel" type="Label" parent="."]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -126,6 +128,13 @@ theme_override_font_sizes/font_size = 48
 text = "CARGANDO..."
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="LoadingIndicator" type="AnimatedSprite2D" parent="."]
+position = Vector2(1190, 630)
+scale = Vector2(0.5, 0.5)
+sprite_frames = ExtResource("2_loading")
+autoplay = "default"
+frame_progress = 0.5
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {

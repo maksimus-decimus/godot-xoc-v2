@@ -1,10 +1,12 @@
-[gd_scene load_steps=13 format=3 uid="uid://c3kq45y0o6jlw"]
+[gd_scene load_steps=16 format=3 uid="uid://c3kq45y0o6jlw"]
 
 [ext_resource type="Script" uid="uid://uto7ou36b7yl" path="res://scripts/game_manager.gd" id="1_f5vmu"]
 [ext_resource type="Script" uid="uid://bsgf5nbf6qoyv" path="res://scripts/player.gd" id="2_b7xqo"]
 [ext_resource type="Texture2D" uid="uid://ct0beb5g4pgrk" path="res://assets/background/Stage_1.png" id="2_gee14"]
-[ext_resource type="Texture2D" path="res://assets/players/don_quixote/sprites/idle.png" id="2_preview"]
+[ext_resource type="Texture2D" uid="uid://dp1h7pp7bfnuf" path="res://assets/players/don_quixote/Sprites/idle.png" id="2_preview"]
+[ext_resource type="Texture2D" uid="uid://dp5n4adnshfst" path="res://assets/msc/bola1.png" id="3_ball"]
 [ext_resource type="Script" uid="uid://doy5hsbkhii0i" path="res://scripts/ball.gd" id="3_dkw5c"]
+[ext_resource type="Texture2D" uid="uid://dxd7au3jp7uq2" path="res://assets/msc/bola_golpe.png" id="4_hit"]
 [ext_resource type="PackedScene" uid="uid://cy1i6pbfawc4k" path="res://scenes/ui/hud.tscn" id="4_pj8yw"]
 [ext_resource type="AudioStream" uid="uid://b21x1nqml55mq" path="res://sound/sfx/golpe/weak_hit.wav" id="5_weak"]
 [ext_resource type="AudioStream" uid="uid://dmyi14f31qcbd" path="res://sound/sfx/golpe/medium_hit.wav" id="6_medium"]
@@ -36,16 +38,16 @@ expand_mode = 1
 stretch_mode = 6
 
 [node name="Player1" type="CharacterBody2D" parent="." groups=["players"]]
-position = Vector2(200, 360)
+position = Vector2(200, 471)
 collision_mask = 14
 script = ExtResource("2_b7xqo")
+idle_offset = Vector2(0, -120)
 
 [node name="VisualContainer" type="Node2D" parent="Player1"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Player1/VisualContainer"]
-texture = ExtResource("2_preview")
-position = Vector2(0, 0)
 scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_preview")
 
 [node name="ColorRect" type="ColorRect" parent="Player1/VisualContainer"]
 offset_left = -32.0
@@ -83,14 +85,14 @@ position = Vector2(1080, 360)
 collision_mask = 14
 script = ExtResource("2_b7xqo")
 player_id = 2
+idle_offset = Vector2(0, -120)
 
 [node name="VisualContainer" type="Node2D" parent="Player2"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Player2/VisualContainer"]
-texture = ExtResource("2_preview")
 visible = false
-position = Vector2(0, 0)
 scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_preview")
 
 [node name="ColorRect" type="ColorRect" parent="Player2/VisualContainer"]
 offset_left = -32.0
@@ -121,16 +123,19 @@ offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="Ball" type="CharacterBody2D" parent="."]
-position = Vector2(640, 360)
+position = Vector2(654, 503)
 collision_layer = 2
 collision_mask = 5
 script = ExtResource("3_dkw5c")
+ball_scale = 4.5
 
-[node name="ColorRect" type="ColorRect" parent="Ball"]
-offset_left = -16.0
-offset_top = -16.0
-offset_right = 16.0
-offset_bottom = 16.0
+[node name="Sprite2D" type="Sprite2D" parent="Ball"]
+scale = Vector2(2.56, 2.56)
+texture = ExtResource("3_ball")
+
+[node name="HitSprite" type="Sprite2D" parent="Ball"]
+visible = false
+texture = ExtResource("4_hit")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ball"]
 shape = SubResource("CircleShape2D_ball")

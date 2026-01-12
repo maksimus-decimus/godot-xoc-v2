@@ -13,6 +13,7 @@ var hp: float = Global.MAX_HP
 var max_hp: float = Global.MAX_HP
 var is_hitting: bool = false
 var invulnerable: bool = false
+var is_dead: bool = false
 var last_direction: Vector2 = Vector2.RIGHT
 
 # Sistema de movimiento avanzado
@@ -28,6 +29,22 @@ var tap_direction: float = 0.0
 # Sonidos de daño
 var hit_sounds: Array[AudioStream] = []
 
+# Offsets ajustables desde el Inspector (Y negativo = arriba, positivo = abajo)
+@export_group("Sprite Offsets")
+@export var idle_offset: Vector2 = Vector2(0, 0)
+@export var move_offset: Vector2 = Vector2(0, 0)
+@export var jump_offset: Vector2 = Vector2(0, 0)
+@export var hit1_offset: Vector2 = Vector2(0, 0)
+@export var hit1_2_offset: Vector2 = Vector2(0, 0)
+@export var hit1_3_offset: Vector2 = Vector2(0, 0)
+@export var block_offset: Vector2 = Vector2(0, 0)
+@export var dmg_offset: Vector2 = Vector2(0, 0)
+
+# Configuración de hitbox
+@export_group("Hitbox")
+@export var hit_distance: float = 50.0
+@export var hit_offset: Vector2 = Vector2(0, 0)
+
 # Sprites del personaje
 var sprites = {
 	"idle": null,
@@ -39,6 +56,7 @@ var sprites = {
 	"block": null,
 	"dmg": null
 }
+
 var current_sprite_state: String = "idle"
 var has_sprites: bool = false
 
@@ -62,30 +80,42 @@ func load_character_sprites() -> void:
 	# Determinar personaje seleccionado
 	var character = Global.player1_character if player_id == 1 else Global.player2_character
 	
-	# Cargar sprites solo si es Don Quixote (character 0)
+	print("Player ", player_id, " cargando character: ", character)
+	
+	var base_path = ""
+	
+	# Determinar ruta según personaje (¡RESPETAR MAYÚSCULAS!)
 	if character == 0:
-		var base_path = "res://assets/players/don_quixote/sprites/"
-		if ResourceLoader.exists(base_path + "idle.png"):
-			sprites["idle"] = load(base_path + "idle.png")
-			sprites["move"] = load(base_path + "move.png")
-			sprites["jump"] = load(base_path + "jump.png")
-			sprites["hit1"] = load(base_path + "hit1.png")
-			sprites["hit1_2"] = load(base_path + "hit1_2.png")
-			sprites["hit1_3"] = load(base_path + "hit1_3.png")
-			sprites["block"] = load(base_path + "block.png")
-			sprites["dmg"] = load(base_path + "dmg.png")
-			has_sprites = true
-			color_rect.visible = false  # Ocultar placeholder
-			sprite_node.visible = true
-		else:
-			has_sprites = false
-			color_rect.visible = true
-			sprite_node.visible = false
+		base_path = "res://assets/players/don_quixote/Sprites/"
+	elif character == 1:
+		base_path = "res://assets/players/ishmael/Sprites/"
+	
+	print("Ruta sprites: ", base_path)
+	
+	# Intentar cargar sprites si hay una ruta válida
+	if base_path != "" and ResourceLoader.exists(base_path + "idle.png"):
+		sprites["idle"] = load(base_path + "idle.png")
+		sprites["move"] = load(base_path + "move.png")
+		sprites["jump"] = load(base_path + "jump.png")
+		sprites["hit1"] = load(base_path + "hit1.png")
+		sprites["hit1_2"] = load(base_path + "hit1_2.png")
+		sprites["hit1_3"] = load(base_path + "hit1_3.png")
+		sprites["block"] = load(base_path + "block.png")
+		sprites["dmg"] = load(base_path + "dmg.png")
+		has_sprites = true
+		color_rect.visible = false  # Ocultar placeholder
+		sprite_node.visible = true
+		
+		# Configurar centrado del sprite
+		sprite_node.centered = true
+		sprite_node.offset = Vector2.ZERO
+		print("Sprites cargados correctamente!")
 	else:
-		# Ishmael u otros personajes usan placeholder
+		# Usar placeholder si no hay sprites
 		has_sprites = false
 		color_rect.visible = true
 		sprite_node.visible = false
+		print("No se encontraron sprites, usando placeholder")
 
 func update_sprite_state(state: String) -> void:
 	if not has_sprites or current_sprite_state == state:
@@ -94,6 +124,20 @@ func update_sprite_state(state: String) -> void:
 	if sprites.has(state) and sprites[state] != null:
 		sprite_node.texture = sprites[state]
 		current_sprite_state = state
+		
+		# Aplicar offset específico para cada sprite
+		sprite_node.centered = true
+		var offset = Vector2.ZERO
+		match state:
+			"idle": offset = idle_offset
+			"move": offset = move_offset
+			"jump": offset = jump_offset
+			"hit1": offset = hit1_offset
+			"hit1_2": offset = hit1_2_offset
+			"hit1_3": offset = hit1_3_offset
+			"block": offset = block_offset
+			"dmg": offset = dmg_offset
+		sprite_node.offset = offset
 
 func play_random_hit_sound() -> void:
 	if hit_sounds.size() > 0:
@@ -112,7 +156,43 @@ func setup_character() -> void:
 		else:  # Círculo azul
 			color_rect.color = Color.BLUE if player_id == 1 else Color.CYAN
 	else:
-		# Usar sprite inicial
+		# Configurar sprite inicial con centrado y dirección
+		sprite_node.centered = true
+		sprite_node.offset = Vector2.ZERO
+		# P1 mira a la derecha, P2 mira a la izquierda
+		sprite_node.flip_h = (player_id == 2)
+		
+		# Configurar offsets según el personaje (no por player_id)
+		# Así ambos jugadores con el mismo personaje tienen la misma altura
+		if character == 0:  # Don Quixote
+			# Aquí van los offsets de Don Quixote
+			idle_offset = Vector2(0, -120)
+			move_offset = Vector2(0, 0)
+			jump_offset = Vector2(0, 0)
+			hit1_offset = Vector2(0, 0)
+			hit1_2_offset = Vector2(0, 0)
+			hit1_3_offset = Vector2(0, 0)
+			block_offset = Vector2(0, 0)
+			dmg_offset = Vector2(0, 0)
+			# Configurar hitbox de Don Quixote
+			hit_distance = 50.0
+			hit_offset = Vector2(0, 0)
+		elif character == 1:  # Ishmael
+			# Copiar los mismos offsets que Don Quixote para mantener altura
+			idle_offset = Vector2(0, 0)
+			move_offset = Vector2(0, 0)
+			jump_offset = Vector2(0, 0)
+			hit1_offset = Vector2(0, 0)
+			hit1_2_offset = Vector2(0, 0)
+			hit1_3_offset = Vector2(0, 0)
+			block_offset = Vector2(0, 0)
+			dmg_offset = Vector2(0, 0)
+			# Configurar hitbox dwde Ishmael
+			hit_distance = 100.0
+			hit_offset = Vector2(0, 0)
+		
+		# Forzar carga del sprite inicial
+		current_sprite_state = ""
 		update_sprite_state("idle")
 	
 	hp = max_hp
@@ -241,8 +321,7 @@ func _physics_process(delta: float) -> void:
 
 func update_hit_area_position() -> void:
 	# Posicionar el área de golpe delante del jugador según su última dirección
-	var offset_distance = 50.0
-	hit_area.position = last_direction * offset_distance
+	hit_area.position = last_direction * hit_distance + hit_offset
 
 func update_sprite_animation(direction_x: float) -> void:
 	if not has_sprites:
@@ -298,11 +377,20 @@ func hit() -> void:
 	is_hitting = false
 
 func take_damage(damage: float, knockback_direction: Vector2) -> void:
-	if invulnerable:
+	if invulnerable or is_dead:
 		return
 	
 	hp -= damage
 	player_damaged.emit(player_id, damage)
+	
+	# Verificar si murió
+	if hp <= 0:
+		hp = 0
+		is_dead = true
+		player_defeated.emit(player_id)
+		# Ejecutar animación de muerte (await para que termine antes de continuar)
+		await death_animation(knockback_direction)
+		return
 	
 	# Mostrar sprite de daño
 	if has_sprites:
@@ -320,11 +408,54 @@ func take_damage(damage: float, knockback_direction: Vector2) -> void:
 	
 	await get_tree().create_timer(Global.INVULNERABILITY_TIME).timeout
 	invulnerable = false
+
+func death_animation(knockback_direction: Vector2) -> void:
+	# Mostrar sprite de daño
+	if has_sprites:
+		update_sprite_state("dmg")
 	
-	# Verificar si murió
-	if hp <= 0:
-		hp = 0
-		player_defeated.emit(player_id)
+	# Reproducir sonido de daño
+	play_random_hit_sound()
+	
+	# Desactivar colisión para que no interfiera
+	collision_shape.set_deferred("disabled", true)
+	hit_area.monitoring = false
+	
+	print("Iniciando animación de muerte para jugador ", player_id)
+	
+	# Impulso inicial: sube hacia arriba suavemente (estilo Super Mario)
+	velocity.x = 0  # Sin movimiento horizontal
+	velocity.y = -250  # Impulso más suave hacia arriba
+	
+	# Animación de rotación y vuelo
+	var rotation_speed = 3.0  # Rotación más lenta
+	var flight_time = 4.0  # Duración total de la animación
+	var elapsed = 0.0
+	
+	while elapsed < flight_time:
+		var delta = get_physics_process_delta_time()
+		elapsed += delta
+		
+		# Rotar el contenedor visual muy suavemente
+		visual_container.rotation += rotation_speed * delta
+		
+		# Aplicar gravedad muy suave para caída lenta y natural
+		velocity.y += Global.GRAVITY * delta * 0.2
+		
+		# Mover
+		position += velocity * delta
+		
+		# Fade out gradual en la última mitad de la animación
+		if elapsed > flight_time * 0.5:
+			var fade_progress = (elapsed - flight_time * 0.5) / (flight_time * 0.5)
+			visual_container.modulate.a = 1.0 - fade_progress
+		
+		await get_tree().process_frame
+	
+	print("Animación de muerte completada para jugador ", player_id)
+	
+	# Hacer invisible al final
+	visual_container.visible = false
 
 func blink_effect() -> void:
 	for i in range(5):
@@ -338,6 +469,18 @@ func respawn(spawn_position: Vector2) -> void:
 	hp = max_hp
 	velocity = Vector2.ZERO
 	invulnerable = true
+	is_dead = false
+	
+	# Restaurar visuales
+	visual_container.visible = true
+	visual_container.modulate.a = 1.0
+	visual_container.rotation = 0.0
+	collision_shape.set_deferred("disabled", false)
+	
+	# Volver a idle
+	if has_sprites:
+		current_sprite_state = ""
+		update_sprite_state("idle")
 	
 	await get_tree().create_timer(1.0).timeout
 	invulnerable = false

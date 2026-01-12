@@ -1,10 +1,14 @@
 extends CharacterBody2D
 
-@onready var sprite = $ColorRect
+@onready var sprite = $Sprite2D
+@onready var hit_sprite = $HitSprite
 @onready var collision_shape = $CollisionShape2D
 @onready var weak_sound = $WeakSound
 @onready var medium_sound = $MediumSound
 @onready var strong_sound = $StrongSound
+
+@export var ball_scale: float = 1.0  # Escala de la pelota (ajustable desde Inspector)
+@export var rotation_speed: float = 3.0  # Velocidad de rotación
 
 var speed: float = Global.INITIAL_BALL_SPEED
 var direction: Vector2 = Vector2.ZERO
@@ -20,8 +24,17 @@ func _ready() -> void:
 	var angle = randf_range(0, TAU)
 	direction = Vector2(cos(angle), sin(angle)).normalized()
 	velocity = direction * speed
+	# Aplicar escala
+	sprite.scale = Vector2(ball_scale, ball_scale)
+	hit_sprite.scale = Vector2(ball_scale, ball_scale)
+	hit_sprite.visible = false
+	# Iniciar en estado neutral
+	update_tag_color()
 
 func _physics_process(delta: float) -> void:
+	# Rotar la pelota continuamente
+	sprite.rotation += rotation_speed * delta
+	
 	var collision = move_and_collide(velocity * delta)
 	
 	if collision:
@@ -31,8 +44,10 @@ func _physics_process(delta: float) -> void:
 		if collider is CharacterBody2D and collider.has_method("take_damage"):
 			var player = collider
 			
-			# Solo hacer daño si el jugador NO es el dueño del tag
-			if player.player_id != owner_player_id:
+			# Solo hacer daño si:
+			# 1. La pelota NO está en estado neutral (owner_player_id != 0)
+			# 2. El jugador NO es el dueño del tag
+			if owner_player_id != 0 and player.player_id != owner_player_id:
 				var damage = calculate_damage()
 				var knockback_dir = (player.global_position - global_position).normalized()
 				
@@ -69,23 +84,35 @@ func hit_by_player(player_position: Vector2, player: CharacterBody2D) -> void:
 	# Reproducir sonido según velocidad y aplicar efectos
 	play_hit_sound_by_speed(speed, player)
 	
-	# Efecto visual
+	# Efecto visual - mantener ball_scale
 	var tween = create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.4, 1.4), 0.1)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.1)
+	tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.4, ball_scale * 1.4), 0.1)
+	tween.tween_property(sprite, "scale", Vector2(ball_scale, ball_scale), 0.1)
 	
-	# Cambiar color según velocidad
-	update_color()
+	# Cambiar color según el dueño del tag
+	update_tag_color()
+
+func update_tag_color() -> void:
+	# Color según quién tiene el tag (usa modulate para sprites)
+	if owner_player_id == 0:
+		# Neutral - blanco
+		sprite.modulate = Color.WHITE
+	elif owner_player_id == 1:
+		# Player 1 - azul
+		sprite.modulate = Color.DODGER_BLUE
+	elif owner_player_id == 2:
+		# Player 2 - rojo
+		sprite.modulate = Color.RED
 
 func update_color() -> void:
 	if speed < 400:
-		sprite.color = Color.WHITE
+		sprite.modulate = Color.WHITE
 	elif speed < 800:
-		sprite.color = Color.YELLOW
+		sprite.modulate = Color.YELLOW
 	elif speed < 1200:
-		sprite.color = Color.ORANGE
+		sprite.modulate = Color.ORANGE
 	else:
-		sprite.color = Color.RED
+		sprite.modulate = Color.RED
 
 func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> void:
 	if current_speed < Global.WEAK_THRESHOLD:
@@ -102,6 +129,16 @@ func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> v
 		if game_manager and game_manager.has_method("screen_shake"):
 			game_manager.screen_shake(2.0, 30.0)
 		freeze_player(player)
+		# Mostrar sprite de golpe orientado según dirección
+		show_hit_effect()
+
+func show_hit_effect() -> void:
+	# Mostrar sprite de golpe orientado según la dirección
+	hit_sprite.visible = true
+	hit_sprite.rotation = direction.angle()
+	# Ocultar después de un breve momento
+	await get_tree().create_timer(0.15).timeout
+	hit_sprite.visible = false
 
 func freeze_player(player: CharacterBody2D) -> void:
 	# Congelar al jugador que golpeó fuerte
@@ -117,15 +154,18 @@ func freeze_player(player: CharacterBody2D) -> void:
 	var original_modulate = player.visual_container.modulate
 	player.visual_container.modulate = Color(0.5, 0.5, 1.0)  # Tinte azul
 	
-	# Efecto visual de "carga" en la bola
-	var original_ball_color = sprite.color
-	sprite.modulate = Color(1.5, 1.5, 0.5)  # Brillo amarillo/dorado
+	# Efecto visual de "carga" en la bola - combinar con color del tag
+	var original_ball_color = sprite.modulate
+	# Aplicar brillo manteniendo el tinte del tag
+	var brightened_color = original_ball_color * 1.5
+	brightened_color.a = 1.0  # Mantener alpha
+	sprite.modulate = brightened_color
 	
-	# Efecto de pulsación en la bola
+	# Efecto de pulsación en la bola - mantener ball_scale
 	var pulse_tween = create_tween()
 	pulse_tween.set_loops(4)
-	pulse_tween.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.25)
-	pulse_tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.25)
+	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.3, ball_scale * 1.3), 0.25)
+	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale, ball_scale), 0.25)
 	
 	# Descongelar después de 2 segundos
 	await get_tree().create_timer(2.0).timeout
@@ -135,17 +175,17 @@ func freeze_player(player: CharacterBody2D) -> void:
 		player.is_hitting = false
 		player.visual_container.modulate = original_modulate
 	
-	# Descongelar la bola y lanzarla con fuerza
+	# Descongelar la bola y restaurar su color original del tag
 	set_physics_process(true)
 	velocity = stored_velocity
-	sprite.modulate = Color.WHITE
-	sprite.scale = Vector2.ONE
+	sprite.modulate = original_ball_color
+	sprite.scale = Vector2(ball_scale, ball_scale)
 
 func reset_ball(spawn_position: Vector2) -> void:
 	global_position = spawn_position
 	speed = Global.INITIAL_BALL_SPEED
 	last_hit_player = null
-	owner_player_id = 0  # Sin dueño al inicio
+	owner_player_id = 0  # Volver a estado neutral
 	
 	# Nueva dirección aleatoria
 	randomize()
@@ -153,5 +193,7 @@ func reset_ball(spawn_position: Vector2) -> void:
 	direction = Vector2(cos(angle), sin(angle)).normalized()
 	velocity = direction * speed
 	
-	sprite.color = Color.WHITE
-	sprite.scale = Vector2.ONE
+	# Volver a color neutral (blanco)
+	sprite.modulate = Color.WHITE
+	sprite.scale = Vector2(ball_scale, ball_scale)
+	hit_sprite.visible = false

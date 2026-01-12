@@ -13,6 +13,7 @@ const SPAWN_BALL = Vector2(640, 300)
 var ball_active: bool = true
 
 func _ready() -> void:
+	MusicManager.play_music(MusicManager.STAGE_MUSIC)
 	setup_game()
 	
 	# Conectar señales de jugadores

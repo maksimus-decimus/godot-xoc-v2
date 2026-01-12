@@ -14,6 +14,7 @@ var p1_character: int = -1
 var p2_character: int = -1
 
 func _ready() -> void:
+	MusicManager.play_music(MusicManager.CHAR_SELECT_MUSIC)
 	continue_button.disabled = true
 	update_ui()
 
@@ -69,4 +70,10 @@ func update_ui() -> void:
 func _on_continue_button_pressed() -> void:
 	Global.player1_character = p1_character
 	Global.player2_character = p2_character
+	
+	# Guardar perfil del jugador 1
+	UserProfile.current_profile["main_character"] = p1_character
+	UserProfile.save_profile()
+	UserProfile.save_last_profile()
+	
 	SceneTransition.fade_to_scene("res://scenes/map_select.tscn")

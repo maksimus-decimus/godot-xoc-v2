@@ -3,6 +3,7 @@ extends Node
 @onready var start_button = $CanvasLayer/CenterContainer/VBoxContainer/StartButton
 
 func _ready() -> void:
+	MusicManager.play_music(MusicManager.CHAR_SELECT_MUSIC)
 	start_button.grab_focus()
 	Global.selected_map = 0
 

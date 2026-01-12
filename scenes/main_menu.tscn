@@ -1,48 +1,80 @@
-[gd_scene load_steps=3 format=3 uid="uid://b4d3q7ybw8xqy"]
+[gd_scene load_steps=5 format=3 uid="uid://b4d3q7ybw8xqy"]
 
 [ext_resource type="Script" uid="uid://dd1357fybtlw6" path="res://scripts/main_menu.gd" id="1_1n7cy"]
 [ext_resource type="Texture2D" uid="uid://7yekx1gn2x1n" path="res://assets/background/Menu.png" id="2_ekxnf"]
+[ext_resource type="Texture2D" uid="uid://biavxj5gpfh1v" path="res://assets/msc/boton.png" id="3_button"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_button"]
+texture = ExtResource("3_button")
+texture_margin_left = 10.0
+texture_margin_top = 10.0
+texture_margin_right = 10.0
+texture_margin_bottom = 10.0
 
 [node name="MainMenu" type="Node"]
 script = ExtResource("1_1n7cy")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/CenterContainer"]
-layout_mode = 2
-theme_override_constants/separation = 30
-
-[node name="TitleLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer"]
-layout_mode = 2
+[node name="TitleLabel" type="Label" parent="CanvasLayer"]
+offset_left = 440.0
+offset_top = 100.0
+offset_right = 840.0
+offset_bottom = 164.0
 theme_override_font_sizes/font_size = 64
 text = "LETHAL LEAGUE"
 horizontal_alignment = 1
 
-[node name="PlayButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 60)
-layout_mode = 2
+[node name="PlayButton" type="Button" parent="CanvasLayer"]
+offset_left = 490.0
+offset_top = 300.0
+offset_right = 790.0
+offset_bottom = 360.0
 theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxTexture_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_button")
+theme_override_styles/hover = SubResource("StyleBoxTexture_button")
 text = "JUGAR"
 
-[node name="QuitButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 60)
-layout_mode = 2
+[node name="QuitButton" type="Button" parent="CanvasLayer"]
+offset_left = 490.0
+offset_top = 400.0
+offset_right = 790.0
+offset_bottom = 460.0
 theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = SubResource("StyleBoxTexture_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_button")
+theme_override_styles/hover = SubResource("StyleBoxTexture_button")
 text = "SALIR"
+
+[node name="ProfileButton" type="Button" parent="CanvasLayer"]
+offset_left = 1090.0
+offset_top = 640.0
+offset_right = 1270.0
+offset_bottom = 700.0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxTexture_button")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_button")
+theme_override_styles/hover = SubResource("StyleBoxTexture_button")
+text = "Perfil"
+
+[node name="ProfileNameLabel" type="Label" parent="CanvasLayer"]
+offset_left = 1050.0
+offset_top = 600.0
+offset_right = 1262.0
+offset_bottom = 630.0
+theme_override_font_sizes/font_size = 14
+text = "Sin perfil"
+horizontal_alignment = 2
 
 [node name="TextureRect" type="TextureRect" parent="."]
 offset_right = 1285.0
 offset_bottom = 720.0
+mouse_filter = 2
 texture = ExtResource("2_ekxnf")
 expand_mode = 1
 stretch_mode = 6
 
-[connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/PlayButton" to="." method="_on_play_button_pressed"]
-[connection signal="pressed" from="CanvasLayer/CenterContainer/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/ProfileButton" to="." method="_on_profile_button_pressed"]

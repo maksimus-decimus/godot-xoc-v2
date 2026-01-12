@@ -1,0 +1,129 @@
+[gd_scene load_steps=2 format=3 uid="uid://bp5q3j62qu18"]
+
+[ext_resource type="Script" path="res://scenes/profile_menu.gd" id="1_8f8m5"]
+
+[node name="ProfileMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_8f8m5")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.15, 0.15, 0.2, 1)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="TitleLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Mi Perfil"
+theme_override_font_sizes/font_size = 32
+alignment = 1
+
+[node name="HSeparator1" type="HSeparator" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Nombre:"
+theme_override_font_sizes/font_size = 18
+
+[node name="NameInput" type="LineEdit" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+placeholder_text = "Escribe tu nombre..."
+
+[node name="HSeparator2" type="HSeparator" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="StatsVBox" type="VBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StatsLabel" type="Label" parent="PanelContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+text = "Estadísticas:"
+theme_override_font_sizes/font_size = 18
+
+[node name="WinsLabel" type="Label" parent="PanelContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+text = "Victorias: 0"
+theme_override_font_sizes/font_size = 16
+
+[node name="LossesLabel" type="Label" parent="PanelContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+text = "Derrotas: 0"
+theme_override_font_sizes/font_size = 16
+
+[node name="WinRateLabel" type="Label" parent="PanelContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+text = "Tasa de victoria: 0.0%"
+theme_override_font_sizes/font_size = 16
+
+[node name="MainCharLabel" type="Label" parent="PanelContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+text = "Personaje favorito: Quixote"
+theme_override_font_sizes/font_size = 16
+
+[node name="TotalGamesLabel" type="Label" parent="PanelContainer/VBoxContainer/StatsVBox"]
+layout_mode = 2
+text = "Partidas totales: 0"
+theme_override_font_sizes/font_size = 16
+
+[node name="HSeparator3" type="HSeparator" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SaveButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Guardar"
+
+[node name="DeleteButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Eliminar"
+
+[node name="BackButton" type="Button" parent="PanelContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Volver"
