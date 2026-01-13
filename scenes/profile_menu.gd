@@ -88,4 +88,4 @@ func _on_delete_pressed() -> void:
 	confirm_dialog.popup_centered_ratio(0.4)
 
 func _on_back_pressed() -> void:
-	SceneTransition.fade_to_scene("res://scenes/main_menu.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")

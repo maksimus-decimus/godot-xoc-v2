@@ -83,7 +83,7 @@ func refresh_profile_list() -> void:
 func _on_profile_selected(profile_name: String) -> void:
 	if UserProfile.load_profile(profile_name):
 		print("✓ Perfil seleccionado: ", profile_name)
-		SceneTransition.fade_to_scene("res://scenes/profile_menu.tscn")
+		SceneTransition.loading_screen_to_scene("res://scenes/profile_menu.tscn")
 	else:
 		print("❌ Error al cargar perfil")
 
@@ -122,4 +122,4 @@ func _on_delete_profile(profile_name: String) -> void:
 	confirm_dialog.popup_centered_ratio(0.4)
 
 func _on_back_pressed() -> void:
-	SceneTransition.fade_to_scene("res://scenes/main_menu.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")

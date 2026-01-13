@@ -22,4 +22,4 @@ func _update_profile_stats() -> void:
 
 func _on_menu_button_pressed() -> void:
 	Global.reset_game()
-	SceneTransition.fade_to_scene("res://scenes/main_menu.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")

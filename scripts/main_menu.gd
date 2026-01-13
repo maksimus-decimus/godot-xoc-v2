@@ -23,10 +23,10 @@ func update_profile_display() -> void:
 		profile_name_label.modulate = Color(1.0, 1.0, 1.0, 1.0)
 
 func _on_play_button_pressed() -> void:
-	SceneTransition.fade_to_scene("res://scenes/character_select.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/character_select_new.tscn")
 
 func _on_quit_button_pressed() -> void:
 	get_tree().quit()
 
 func _on_profile_button_pressed() -> void:
-	SceneTransition.fade_to_scene("res://scenes/profile_select.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/profile_select.tscn")

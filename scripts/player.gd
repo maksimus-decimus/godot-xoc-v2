@@ -423,39 +423,30 @@ func death_animation(knockback_direction: Vector2) -> void:
 	
 	print("Iniciando animación de muerte para jugador ", player_id)
 	
-	# Impulso inicial: sube hacia arriba suavemente (estilo Super Mario)
-	velocity.x = 0  # Sin movimiento horizontal
-	velocity.y = -250  # Impulso más suave hacia arriba
+	# Impulso inicial: salta hacia arriba y cae fuera de la escena
+	velocity.x = knockback_direction.x * 150  # Un poco de movimiento horizontal
+	velocity.y = -400  # Impulso hacia arriba
 	
-	# Animación de rotación y vuelo
-	var rotation_speed = 3.0  # Rotación más lenta
-	var flight_time = 4.0  # Duración total de la animación
+	# Animación de salto y caída (sin rotación ni fade)
+	var flight_time = 5.0  # Duración de la animación
 	var elapsed = 0.0
 	
-	while elapsed < flight_time:
+	while elapsed < flight_time and is_inside_tree():
 		var delta = get_physics_process_delta_time()
 		elapsed += delta
 		
-		# Rotar el contenedor visual muy suavemente
-		visual_container.rotation += rotation_speed * delta
-		
-		# Aplicar gravedad muy suave para caída lenta y natural
-		velocity.y += Global.GRAVITY * delta * 0.2
+		# Aplicar gravedad normal para caída natural
+		velocity.y += Global.GRAVITY * delta
 		
 		# Mover
 		position += velocity * delta
 		
-		# Fade out gradual en la última mitad de la animación
-		if elapsed > flight_time * 0.5:
-			var fade_progress = (elapsed - flight_time * 0.5) / (flight_time * 0.5)
-			visual_container.modulate.a = 1.0 - fade_progress
-		
-		await get_tree().process_frame
+		if is_inside_tree():
+			await get_tree().process_frame
+		else:
+			break
 	
 	print("Animación de muerte completada para jugador ", player_id)
-	
-	# Hacer invisible al final
-	visual_container.visible = false
 
 func blink_effect() -> void:
 	for i in range(5):

@@ -1,13 +1,22 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfmxyv0pq1xr6"]
+[gd_scene load_steps=12 format=3 uid="uid://cfmxyv0pq1xr6"]
 
 [ext_resource type="Script" uid="uid://bgdrujfs8u5yg" path="res://scripts/character_select.gd" id="1_a4vsy"]
 [ext_resource type="Texture2D" uid="uid://cjt4sgggyl2kb" path="res://assets/players/don_quixote/Donquixote_placeholder.png" id="2_donquixote"]
 [ext_resource type="Texture2D" uid="uid://dbv62y6cg0y6b" path="res://assets/players/ishmael/Ishmael_placeholder.png" id="2_ishmael"]
+[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="4_p44ra"]
+[ext_resource type="Texture2D" uid="uid://dj8sy11od17x2" path="res://assets/char_select_v2/char_base.png" id="5_fqvby"]
+[ext_resource type="Texture2D" uid="uid://bmwcrmd7byxcg" path="res://assets/char_select_v2/p1_p2_fondo.png" id="6_0sghn"]
+[ext_resource type="Texture2D" uid="uid://cxxye758glbbt" path="res://assets/char_select_v2/don_big.png" id="7_yxv22"]
+[ext_resource type="Texture2D" uid="uid://begcrly2cv2ko" path="res://assets/char_select_v2/ishm_big.png" id="8_qokh3"]
+[ext_resource type="Texture2D" uid="uid://fbyjg83gtsow" path="res://assets/char_select_v2/ishm_smll.png" id="9_pj2qx"]
+[ext_resource type="Texture2D" uid="uid://pi1nkhau56x5" path="res://assets/char_select_v2/don_smll.png" id="10_ckm5t"]
+[ext_resource type="Texture2D" uid="uid://b40sjld14m5wk" path="res://assets/char_select_v2/grid.png" id="11_qgi8m"]
 
 [node name="CharacterSelect" type="Node"]
 script = ExtResource("1_a4vsy")
 
 [node name="ColorRect" type="ColorRect" parent="."]
+visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -18,8 +27,10 @@ grow_vertical = 2
 color = Color(0.15, 0.1, 0.25, 1)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="TitleLabel" type="Label" parent="CanvasLayer"]
+visible = false
 anchors_preset = 10
 anchor_right = 1.0
 offset_top = 50.0
@@ -30,6 +41,7 @@ text = "SELECCIÓN DE PERSONAJE"
 horizontal_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer"]
+visible = false
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -210,7 +222,60 @@ offset_right = 100.0
 offset_bottom = -110.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_fonts/font = ExtResource("4_p44ra")
 theme_override_font_sizes/font_size = 24
 text = "CONTINUAR"
+
+[node name="CanvasLayer" type="CanvasLayer" parent="CanvasLayer"]
+visible = false
+
+[node name="CharBase" type="Sprite2D" parent="CanvasLayer/CanvasLayer"]
+position = Vector2(640.00006, 360)
+scale = Vector2(0.26439965, 0.199027)
+texture = ExtResource("5_fqvby")
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="CanvasLayer"]
+layer = 0
+visible = false
+
+[node name="P1P2Fondo" type="Sprite2D" parent="CanvasLayer/CanvasLayer2"]
+position = Vector2(640, 360)
+scale = Vector2(0.2625452, 0.20889425)
+texture = ExtResource("6_0sghn")
+
+[node name="Colores_fondo_jugadores" type="TextureRect" parent="."]
+offset_right = 4800.0
+offset_bottom = 3584.0
+texture = ExtResource("6_0sghn")
+
+[node name="Don_big" type="TextureRect" parent="."]
+offset_right = 4800.0
+offset_bottom = 3584.0
+texture = ExtResource("7_yxv22")
+
+[node name="Ishmael_big" type="TextureRect" parent="."]
+offset_right = 4800.0
+offset_bottom = 3584.0
+texture = ExtResource("8_qokh3")
+
+[node name="ish_ico" type="TextureRect" parent="."]
+offset_right = 4800.0
+offset_bottom = 3584.0
+texture = ExtResource("9_pj2qx")
+
+[node name="Don_ico" type="TextureRect" parent="."]
+offset_right = 4800.0
+offset_bottom = 3584.0
+texture = ExtResource("10_ckm5t")
+
+[node name="Grid_placeholder" type="TextureRect" parent="."]
+offset_right = 4800.0
+offset_bottom = 3584.0
+texture = ExtResource("11_qgi8m")
+
+[node name="Char_select_fondo" type="TextureRect" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+texture = ExtResource("5_fqvby")
 
 [connection signal="pressed" from="CanvasLayer/ContinueButton" to="." method="_on_continue_button_pressed"]
