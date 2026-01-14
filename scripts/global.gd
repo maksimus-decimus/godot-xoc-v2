@@ -32,6 +32,9 @@ var player2_lives: int = MAX_LIVES
 # Ganador
 var winner: int = 0
 
+# Control de inicio de juego
+var game_should_start: bool = true
+
 # Reiniciar el juego
 func reset_game() -> void:
 	player1_lives = MAX_LIVES
@@ -40,6 +43,7 @@ func reset_game() -> void:
 	player1_character = 0
 	player2_character = 0
 	selected_map = 0
+	game_should_start = true
 
 # Restar una vida a un jugador
 func player_lost_life(player_id: int) -> void:

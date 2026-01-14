@@ -8,9 +8,9 @@ extends Node2D
 @onready var don_ico = $CharacterIcons/DonIco
 @onready var ish_ico = $CharacterIcons/IshIco
 
-# Referencias a imágenes grandes (preview)
-@onready var don_big = $CharacterBig/DonBig
-@onready var ish_big = $CharacterBig/IshBig
+# Referencias a imágenes grandes (preview) - Separadas por lado
+@onready var character_big_l = $CharacterBigL  # Lado izquierdo (P1)
+@onready var character_big_r = $CharacterBigR  # Lado derecho (P2)
 
 # Referencias a recuadros de selección
 @onready var p1_selector = $Selectors/P1Selector
@@ -24,172 +24,195 @@ extends Node2D
 @onready var ish_button = $CharacterIcons/IshButton
 
 # Estados de selección
-var p1_character_index: int = -1  # -1 = no seleccionado, 0 = Don, 1 = Ishmael
-var p2_character_index: int = -1
-var current_turn: int = 1  # 1 = P1 seleccionando, 2 = P2 seleccionando
+var p1_character_index: int = 0  # Empieza en Don
+var p2_character_index: int = 0  # Empieza en Don
 var p1_confirmed: bool = false
 var p2_confirmed: bool = false
 
-# Posiciones de los selectores según personaje
-var selector_positions = {
-	0: Vector2.ZERO,  # Don - se configurará en _ready
-	1: Vector2.ZERO   # Ishmael - se configurará en _ready
-}
+# Posiciones exactas de los selectores (ajusta estos valores según tus íconos)
+var selector_positions = [
+	Vector2(0,0),  # Don - posición del selector sobre Don
+	Vector2(255, 0)   # Ishmael - posición del selector sobre Ishmael
+]
 
 func _ready() -> void:
 	MusicManager.play_music(MusicManager.CHAR_SELECT_MUSIC)
 	
-	# Verificar que todos los nodos existen
-	if not don_ico or not ish_ico or not p1_selector or not p2_selector:
-		print("ERROR: Faltan nodos en la escena")
-		return
+	# Ocultar personajes grandes y botón continuar al inicio
+	if character_big_l:
+		for child in character_big_l.get_children():
+			child.visible = false
+	if character_big_r:
+		for child in character_big_r.get_children():
+			child.visible = false
 	
-	# Configurar posiciones de los selectores basadas en los íconos
-	selector_positions[0] = don_ico.position
-	selector_positions[1] = ish_ico.position
+	if continue_button:
+		continue_button.visible = false
 	
-	# Ocultar selectores y personajes grandes al inicio
-	p1_selector.visible = false
-	p2_selector.visible = false
-	don_big.visible = false
-	ish_big.visible = false
-	continue_button.visible = false
+	# Mostrar selector P1 en la primera posición (Don)
+	if p1_selector:
+		p1_selector.visible = true
+		p1_selector.position = selector_positions[0]
+	
+	# Ocultar selector P2 hasta que P1 confirme
+	if p2_selector:
+		p2_selector.visible = false
 	
 	# Conectar señales
+	if continue_button:
+		continue_button.pressed.connect(_on_continue_button_pressed)
 	if don_button:
-		don_button.pressed.connect(func(): select_character(0))
+		don_button.pressed.connect(func(): select_character_by_click(0))
 	if ish_button:
-		ish_button.pressed.connect(func(): select_character(1))
+		ish_button.pressed.connect(func(): select_character_by_click(1))
 	
-	print("Character Select listo. Turno: P", current_turn)
+	# Actualizar visual inicial
+	update_p1_visuals()
+	
+	print("Character Select listo. P1 puede navegar con A/D")
 
 func _process(_delta: float) -> void:
 	# Detectar ESC para cancelar selección
 	if Input.is_action_just_pressed("ui_cancel"):
 		cancel_selection()
 	
-	# Detectar teclas de selección con teclado
-	if current_turn == 1:
+	# Navegación y confirmación para P1
+	if not p1_confirmed:
 		if Input.is_action_just_pressed("p1_left"):
-			select_character(0)  # Don
+			p1_character_index = 0  # Don
+			update_p1_visuals()
 		elif Input.is_action_just_pressed("p1_right"):
-			select_character(1)  # Ishmael
-		elif Input.is_action_just_pressed("p1_hit") and p1_character_index >= 0:
-			confirm_selection()
-	elif current_turn == 2:
+			p1_character_index = 1  # Ishmael
+			update_p1_visuals()
+		elif Input.is_action_just_pressed("p1_hit"):
+			confirm_p1()
+	
+	# Navegación y confirmación para P2 (solo si P1 ya confirmó)
+	if p1_confirmed and not p2_confirmed:
 		if Input.is_action_just_pressed("p2_left"):
-			select_character(0)  # Don
+			p2_character_index = 0  # Don
+			update_p2_visuals()
 		elif Input.is_action_just_pressed("p2_right"):
-			select_character(1)  # Ishmael
-		elif Input.is_action_just_pressed("p2_hit") and p2_character_index >= 0:
-			confirm_selection()
+			p2_character_index = 1  # Ishmael
+			update_p2_visuals()
+		elif Input.is_action_just_pressed("p2_hit"):
+			confirm_p2()
 
-func select_character(character_index: int) -> void:
-	if current_turn == 1:
+func select_character_by_click(character_index: int) -> void:
+	if not p1_confirmed:
 		p1_character_index = character_index
 		update_p1_visuals()
-	elif current_turn == 2:
+	elif not p2_confirmed:
 		p2_character_index = character_index
 		update_p2_visuals()
-	
-	print("P", current_turn, " seleccionó: ", ["Don", "Ishmael"][character_index])
 
-func confirm_selection() -> void:
-	if current_turn == 1 and p1_character_index >= 0:
-		p1_confirmed = true
-		current_turn = 2
-		print("P1 confirmó. Ahora es turno de P2")
-		update_p1_visuals()  # Actualizar visuals para mostrar que está confirmado
-	elif current_turn == 2 and p2_character_index >= 0:
-		p2_confirmed = true
-		print("P2 confirmó. Ambos listos!")
-		update_p2_visuals()  # Actualizar visuals para mostrar que está confirmado
+func confirm_p1() -> void:
+	p1_confirmed = true
+	print("P1 confirmó: ", ["Don", "Ishmael"][p1_character_index])
 	
-	# Si ambos confirmaron, mostrar botón continuar
-	if p1_confirmed and p2_confirmed:
+	# Cambiar color del selector P1 a verde (confirmado)
+	if p1_selector:
+		p1_selector.modulate = Color(0.5, 1, 0.5)  # Verde claro
+	
+	# Mostrar selector P2 en la primera posición
+	if p2_selector:
+		p2_selector.visible = true
+		p2_selector.position = selector_positions[0]
+	
+	p2_character_index = 0
+	update_p2_visuals()
+	
+	print("Ahora es turno de P2. Navega con ←/→")
+
+func confirm_p2() -> void:
+	p2_confirmed = true
+	print("P2 confirmó: ", ["Don", "Ishmael"][p2_character_index])
+	
+	# Cambiar color del selector P2 a verde (confirmado)
+	if p2_selector:
+		p2_selector.modulate = Color(1, 0.5, 0.5)  # Rojo claro/rosa
+	
+	# Mostrar botón continuar
+	if continue_button:
 		continue_button.visible = true
 
 func cancel_selection() -> void:
 	print("Selección cancelada. Reiniciando...")
 	
 	# Resetear todo
-	p1_character_index = -1
-	p2_character_index = -1
+	p1_character_index = 0
+	p2_character_index = 0
 	p1_confirmed = false
 	p2_confirmed = false
-	current_turn = 1
 	
-	# Ocultar todo
-	p1_selector.visible = false
-	p2_selector.visible = false
-	don_big.visible = false
-	ish_big.visible = false
-	continue_button.visible = false
+	# Resetear selectores
+	if p1_selector:
+		p1_selector.visible = true
+		p1_selector.position = selector_positions[0]
+		p1_selector.modulate = Color.WHITE
+	
+	if p2_selector:
+		p2_selector.visible = false
+		p2_selector.modulate = Color.WHITE
+	
+	# Ocultar personajes grandes
+	if character_big_l:
+		for child in character_big_l.get_children():
+			child.visible = false
+	if character_big_r:
+		for child in character_big_r.get_children():
+			child.visible = false
+	
+	# Ocultar botón continuar
+	if continue_button:
+		continue_button.visible = false
+	
+	# Actualizar visual
+	update_p1_visuals()
 
 func update_p1_visuals() -> void:
-	if p1_character_index < 0:
-		p1_selector.visible = false
-		if not p2_confirmed:
-			don_big.visible = false
-			ish_big.visible = false
-		return
+	# Mover selector P1 a la posición del personaje seleccionado
+	if p1_selector:
+		p1_selector.position = selector_positions[p1_character_index]
 	
-	# Mostrar selector P1 (azul/cyan)
-	p1_selector.visible = true
-	p1_selector.position = selector_positions[p1_character_index]
-	
-	# Cambiar color según si está confirmado
-	if p1_confirmed:
-		p1_selector.modulate = Color.GREEN
-	else:
-		p1_selector.modulate = Color.CYAN
-	
-	# Actualizar personaje grande
-	update_big_characters()
+	# Actualizar personaje grande izquierdo
+	update_big_character_left(p1_character_index)
 
 func update_p2_visuals() -> void:
-	if p2_character_index < 0:
-		p2_selector.visible = false
+	# Mover selector P2 a la posición del personaje seleccionado
+	if p2_selector:
+		p2_selector.position = selector_positions[p2_character_index]
+	
+	# Actualizar personaje grande derecho
+	update_big_character_right(p2_character_index)
+
+func update_big_character_left(character_index: int) -> void:
+	if not character_big_l:
 		return
 	
-	# Mostrar selector P2 (rojo)
-	p2_selector.visible = true
-	p2_selector.position = selector_positions[p2_character_index]
+	# Ocultar todos los hijos primero
+	for child in character_big_l.get_children():
+		child.visible = false
 	
-	# Cambiar color según si está confirmado
-	if p2_confirmed:
-		p2_selector.modulate = Color.GREEN
-	else:
-		p2_selector.modulate = Color.RED
-	
-	# Actualizar personaje grande
-	update_big_characters()
+	# Mostrar solo el personaje seleccionado
+	if character_index == 0 and character_big_l.has_node("DonBig"):
+		character_big_l.get_node("DonBig").visible = true
+	elif character_index == 1 and character_big_l.has_node("IshBig"):
+		character_big_l.get_node("IshBig").visible = true
 
-func update_big_characters() -> void:
-	# Determinar qué personajes mostrar
-	var show_don = (p1_character_index == 0 or p2_character_index == 0)
-	var show_ish = (p1_character_index == 1 or p2_character_index == 1)
+func update_big_character_right(character_index: int) -> void:
+	if not character_big_r:
+		return
 	
-	don_big.visible = show_don
-	ish_big.visible = show_ish
+	# Ocultar todos los hijos primero
+	for child in character_big_r.get_children():
+		child.visible = false
 	
-	# Configurar flip según quién lo tenga seleccionado
-	if show_don:
-		# Si P1 lo tiene, mostrar mirando a la derecha (flip)
-		# Si P2 lo tiene, mostrar mirando a la izquierda (normal)
-		if p1_character_index == 0:
-			don_big.flip_h = true
-		elif p2_character_index == 0:
-			don_big.flip_h = false
-	
-	if show_ish:
-		# Ishmael normalmente mira a la derecha
-		# Si P1 lo tiene, flip (para que mire a la derecha desde su lado)
-		# Si P2 lo tiene, normal (mira a la izquierda hacia P1)
-		if p1_character_index == 1:
-			ish_big.flip_h = true
-		elif p2_character_index == 1:
-			ish_big.flip_h = false
+	# Mostrar solo el personaje seleccionado
+	if character_index == 0 and character_big_r.has_node("DonBig"):
+		character_big_r.get_node("DonBig").visible = true
+	elif character_index == 1 and character_big_r.has_node("IshBig"):
+		character_big_r.get_node("IshBig").visible = true
 
 func _on_continue_button_pressed() -> void:
 	if not (p1_confirmed and p2_confirmed):

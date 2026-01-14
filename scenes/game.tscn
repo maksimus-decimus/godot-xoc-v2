@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://c3kq45y0o6jlw"]
+[gd_scene load_steps=24 format=3 uid="uid://c3kq45y0o6jlw"]
 
 [ext_resource type="Script" uid="uid://uto7ou36b7yl" path="res://scripts/game_manager.gd" id="1_f5vmu"]
 [ext_resource type="Script" uid="uid://bsgf5nbf6qoyv" path="res://scripts/player.gd" id="2_b7xqo"]
@@ -8,9 +8,11 @@
 [ext_resource type="Script" uid="uid://doy5hsbkhii0i" path="res://scripts/ball.gd" id="3_dkw5c"]
 [ext_resource type="Texture2D" uid="uid://dxd7au3jp7uq2" path="res://assets/msc/bola_golpe.png" id="4_hit"]
 [ext_resource type="PackedScene" uid="uid://cy1i6pbfawc4k" path="res://scenes/ui/hud.tscn" id="4_pj8yw"]
+[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="5_pause"]
 [ext_resource type="AudioStream" uid="uid://b21x1nqml55mq" path="res://sound/sfx/golpe/weak_hit.wav" id="5_weak"]
 [ext_resource type="AudioStream" uid="uid://dmyi14f31qcbd" path="res://sound/sfx/golpe/medium_hit.wav" id="6_medium"]
 [ext_resource type="AudioStream" uid="uid://dr4j8g66vu5u0" path="res://sound/sfx/golpe/strong_hit.wav" id="7_strong"]
+[ext_resource type="Texture2D" uid="uid://c1b0ssu1n4a0l" path="res://assets/msc/Showtime.png" id="12_dinhu"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
 size = Vector2(64, 80)
@@ -23,6 +25,49 @@ radius = 16.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
 size = Vector2(1280, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kvuet"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(0, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_trtic"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(1210, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ir15t"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(2420, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ca42v"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(3630, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rysoc"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(4840, 0, 1210, 327)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ssvqc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kvuet")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_trtic")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ir15t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ca42v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rysoc")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_f5vmu")
@@ -175,3 +220,12 @@ shape = SubResource("RectangleShape2D_wall")
 
 [node name="HUD" parent="CanvasLayer" instance=ExtResource("4_pj8yw")]
 offset_right = -17.0
+
+[node name="ShowTime" type="AnimatedSprite2D" parent="."]
+position = Vector2(640, 192)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_ssvqc")
+frame = 4
+frame_progress = 0.86627877
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]

@@ -14,6 +14,7 @@ var max_hp: float = Global.MAX_HP
 var is_hitting: bool = false
 var invulnerable: bool = false
 var is_dead: bool = false
+var can_move: bool = true
 var last_direction: Vector2 = Vector2.RIGHT
 
 # Sistema de movimiento avanzado
@@ -198,6 +199,10 @@ func setup_character() -> void:
 	hp = max_hp
 
 func _physics_process(delta: float) -> void:
+	# Si el jugador no puede moverse, no procesar inputs
+	if not can_move:
+		return
+	
 	# Aplicar gravedad
 	if not is_on_floor():
 		velocity.y += Global.GRAVITY * delta

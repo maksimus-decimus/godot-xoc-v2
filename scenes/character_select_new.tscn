@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://b5s3tsslfpaxk"]
+[gd_scene load_steps=12 format=3 uid="uid://b5s3tsslfpaxk"]
 
 [ext_resource type="Script" uid="uid://bgdrujfs8u5yg" path="res://scripts/character_select.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dj8sy11od17x2" path="res://assets/char_select_v2/char_base.png" id="2_char_base"]
@@ -6,7 +6,11 @@
 [ext_resource type="Texture2D" uid="uid://pi1nkhau56x5" path="res://assets/char_select_v2/don_smll.png" id="4_don_smll"]
 [ext_resource type="Texture2D" uid="uid://fbyjg83gtsow" path="res://assets/char_select_v2/ishm_smll.png" id="5_ishm_smll"]
 [ext_resource type="Texture2D" uid="uid://cxxye758glbbt" path="res://assets/char_select_v2/don_big.png" id="6_don_big"]
+[ext_resource type="Texture2D" uid="uid://b40sjld14m5wk" path="res://assets/char_select_v2/grid.png" id="6_iuqkp"]
 [ext_resource type="Texture2D" uid="uid://begcrly2cv2ko" path="res://assets/char_select_v2/ishm_big.png" id="7_ishm_big"]
+[ext_resource type="Texture2D" uid="uid://c6mmi8a5vpka0" path="res://assets/char_select_v2/P1 SELECT.png" id="8_p1_select"]
+[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="9_bpvp5"]
+[ext_resource type="Texture2D" uid="uid://dphgv2mkr4apx" path="res://assets/char_select_v2/P2 SELECT.png" id="9_p2_select"]
 
 [node name="CharacterSelect" type="Node2D"]
 script = ExtResource("1_script")
@@ -14,38 +18,74 @@ script = ExtResource("1_script")
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
 
-[node name="CharBase" type="TextureRect" parent="."]
-offset_right = 1280.0
-offset_bottom = 720.0
-texture = ExtResource("2_char_base")
-expand_mode = 1
-
 [node name="P1P2Fondo" type="TextureRect" parent="."]
 offset_right = 1280.0
 offset_bottom = 720.0
 texture = ExtResource("3_p1p2_fondo")
 expand_mode = 1
 
+[node name="CharacterBigL" type="Node2D" parent="."]
+
+[node name="DonBig" type="TextureRect" parent="CharacterBigL"]
+offset_left = 32.0
+offset_top = -80.0
+offset_right = 841.6
+offset_bottom = 712.0
+texture = ExtResource("6_don_big")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="IshBig" type="TextureRect" parent="CharacterBigL"]
+offset_top = -128.0
+offset_right = 832.0
+offset_bottom = 704.0
+texture = ExtResource("7_ishm_big")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="CharacterBigR" type="Node2D" parent="."]
+
+[node name="DonBig" type="TextureRect" parent="CharacterBigR"]
+offset_left = 480.0
+offset_top = -40.0
+offset_right = 1289.6
+offset_bottom = 752.0
+texture = ExtResource("6_don_big")
+expand_mode = 1
+stretch_mode = 5
+flip_h = true
+
+[node name="IshBig" type="TextureRect" parent="CharacterBigR"]
+offset_left = 448.0
+offset_top = -80.0
+offset_right = 1280.0
+offset_bottom = 752.0
+texture = ExtResource("7_ishm_big")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="CharacterIcons" type="Node2D" parent="."]
 
-[node name="DonIco" type="TextureRect" parent="CharacterIcons"]
-offset_left = 87.00001
-offset_top = -13.999996
-offset_right = 649.65015
-offset_bottom = 382.54446
-scale = Vector2(1.8963828, 1.8963828)
-texture = ExtResource("4_don_smll")
-expand_mode = 1
-stretch_mode = 5
-
 [node name="IshIco" type="TextureRect" parent="CharacterIcons"]
-offset_left = 26.0
-offset_top = -19.0
-offset_right = 1328.0
-offset_bottom = 757.0
+offset_left = -111.0
+offset_top = -147.00002
+offset_right = 1280.3607
+offset_bottom = 839.26917
+rotation = 0.06884071
+scale = Vector2(1.040001, 1.040001)
 texture = ExtResource("5_ishm_smll")
 expand_mode = 1
-stretch_mode = 5
+
+[node name="DonIco" type="TextureRect" parent="CharacterIcons"]
+offset_left = 0.60968065
+offset_top = -78.09333
+offset_right = 587.3276
+offset_bottom = 343.85498
+rotation = 0.021253025
+scale = Vector2(2.2163825, 2.2163825)
+texture = ExtResource("4_don_smll")
+expand_mode = 1
 
 [node name="DonButton" type="Button" parent="CharacterIcons"]
 modulate = Color(1, 1, 1, 0)
@@ -57,69 +97,42 @@ flat = true
 
 [node name="IshButton" type="Button" parent="CharacterIcons"]
 modulate = Color(1, 1, 1, 0)
-offset_left = 768.0
-offset_top = 90.0
-offset_right = 968.0
-offset_bottom = 290.0
+offset_left = 744.0
+offset_top = 88.0
+offset_right = 944.0
+offset_bottom = 288.0
 flat = true
+
+[node name="Grid" type="TextureRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("6_iuqkp")
+expand_mode = 1
+
+[node name="CharBase" type="TextureRect" parent="."]
+offset_right = 1280.0
+offset_bottom = 720.0
+texture = ExtResource("2_char_base")
+expand_mode = 1
 
 [node name="Selectors" type="Node2D" parent="."]
 
-[node name="P1Selector" type="ColorRect" parent="Selectors"]
-visible = false
-offset_left = 395.0
-offset_top = 305.0
-offset_right = 605.0
-offset_bottom = 515.0
-color = Color(0, 1, 1, 0.5)
-
-[node name="Border" type="ColorRect" parent="Selectors/P1Selector"]
-show_behind_parent = true
-layout_mode = 0
-offset_left = -5.0
-offset_top = -5.0
-offset_right = 215.0
-offset_bottom = 215.0
-color = Color(0, 0.7, 1, 1)
-
-[node name="P2Selector" type="ColorRect" parent="Selectors"]
-visible = false
-offset_left = 675.0
-offset_top = 305.0
-offset_right = 885.0
-offset_bottom = 515.0
-color = Color(1, 0, 0, 0.5)
-
-[node name="Border" type="ColorRect" parent="Selectors/P2Selector"]
-show_behind_parent = true
-layout_mode = 0
-offset_left = -5.0
-offset_top = -5.0
-offset_right = 215.0
-offset_bottom = 215.0
-color = Color(1, 0, 0, 1)
-
-[node name="CharacterBig" type="Node2D" parent="."]
-
-[node name="DonBig" type="TextureRect" parent="CharacterBig"]
-visible = false
-offset_left = 50.0
-offset_top = 160.0
-offset_right = 450.0
-offset_bottom = 560.0
-texture = ExtResource("6_don_big")
+[node name="P1Selector" type="TextureRect" parent="Selectors"]
+offset_left = 1.0
+offset_top = -2.0
+offset_right = 1281.0
+offset_bottom = 723.0
+texture = ExtResource("8_p1_select")
 expand_mode = 1
-stretch_mode = 5
 
-[node name="IshBig" type="TextureRect" parent="CharacterBig"]
+[node name="P2Selector" type="TextureRect" parent="Selectors"]
 visible = false
-offset_left = 830.0
-offset_top = 160.0
-offset_right = 1230.0
-offset_bottom = 560.0
-texture = ExtResource("7_ishm_big")
+offset_left = 1.0
+offset_top = -2.0
+offset_right = 1279.0
+offset_bottom = 716.0
+texture = ExtResource("9_p2_select")
 expand_mode = 1
-stretch_mode = 5
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -129,30 +142,31 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -300.0
-offset_top = -100.0
-offset_right = 300.0
-offset_bottom = -50.0
+offset_left = -312.0
+offset_top = -61.0
+offset_right = 288.0
+offset_bottom = -11.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_font_sizes/font_size = 18
+theme_override_fonts/font = ExtResource("9_bpvp5")
+theme_override_font_sizes/font_size = 24
 text = "P1: A/D + ESPACIO | P2: ←/→ + ENTER"
 horizontal_alignment = 1
 
 [node name="ContinueButton" type="Button" parent="CanvasLayer"]
-visible = false
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -100.0
-offset_top = -150.0
-offset_right = 100.0
-offset_bottom = -110.0
+offset_left = -40.0
+offset_top = -696.0
+offset_right = 275.0
+offset_bottom = -633.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_font_sizes/font_size = 24
+theme_override_fonts/font = ExtResource("9_bpvp5")
+theme_override_font_sizes/font_size = 32
 text = "CONTINUAR"
 
 [connection signal="pressed" from="CanvasLayer/ContinueButton" to="." method="_on_continue_button_pressed"]

@@ -130,8 +130,8 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="LoadingIndicator" type="AnimatedSprite2D" parent="."]
-position = Vector2(1141.0001, 612)
-scale = Vector2(0.41875, 0.41875)
+position = Vector2(1186, 610)
+scale = Vector2(0.27812505, 0.27812505)
 sprite_frames = ExtResource("2_loading")
 autoplay = "default"
 frame_progress = 0.043235574
