@@ -21,6 +21,7 @@ Global="*res://scripts/global.gd"
 SceneTransition="*res://scenes/scene_transition.tscn"
 UserProfile="*res://scripts/user_profile.gd"
 MusicManager="*res://scripts/music_manager.gd"
+UISounds="*res://scripts/ui_sounds.gd"
 
 [display]
 

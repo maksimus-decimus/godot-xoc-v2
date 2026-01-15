@@ -24,7 +24,12 @@ var intro_battle_start_player: AudioStreamPlayer
 func _ready() -> void:
 	# Asegurar que el juego no esté pausado al iniciar
 	get_tree().paused = false
+	is_paused = false
 	intro_started = false
+	
+	# Configurar el menú de pausa para que procese cuando esté pausado
+	if pause_menu:
+		pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	
 	MusicManager.play_music(MusicManager.STAGE_MUSIC)
 	
@@ -183,6 +188,7 @@ func toggle_pause() -> void:
 
 func _on_pause_continue() -> void:
 	is_paused = false
+	get_tree().paused = false
 
 func _on_pause_quit() -> void:
 	is_paused = false
@@ -206,7 +212,8 @@ func start_intro_sequence() -> void:
 	
 	# Arrays con los nombres de archivos disponibles
 	var intro_battle_files = [
-		"res://sound/announcer/intro_battle/intro_battle_2.wav",
+		"res://sound/announcer/intro_battle/Intro_battle.wav",
+		"res://sound/announcer/intro_battle/intro_battle2.wav",
 		"res://sound/announcer/intro_battle/intro_battle_3.wav",
 		"res://sound/announcer/intro_battle/intro_battle_4.wav"
 	]
@@ -236,8 +243,9 @@ func start_intro_sequence() -> void:
 	intro_battle_start_player.stream = load(random_intro_battle_start)
 	intro_battle_start_player.play()
 	
-	# Esperar 1.5 segundos mientras se muestra ShowTime
-	await get_tree().create_timer(1.5).timeout
+	# Esperar 1.5 segundos mientras se muestra ShowTime (con process_always para que funcione aunque esté pausado)
+	var timer = get_tree().create_timer(1.5, true, false, true)
+	await timer.timeout
 	
 	# Ocultar ShowTime
 	if showtime_sprite:

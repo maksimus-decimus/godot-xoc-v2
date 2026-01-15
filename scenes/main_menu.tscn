@@ -10,10 +10,16 @@ script = ExtResource("1_1n7cy")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="PlayButton" type="Button" parent="CanvasLayer"]
-offset_top = 312.0
-offset_right = 300.0
-offset_bottom = 377.0
+[node name="Choice" type="Sprite2D" parent="CanvasLayer"]
+position = Vector2(120, 344)
+scale = Vector2(0.69204164, 0.69204164)
+texture = ExtResource("4_8ln24")
+
+[node name="PlayButton" type="Button" parent="CanvasLayer/Choice"]
+offset_left = -115.599976
+offset_top = -34.679993
+offset_right = 184.40002
+offset_bottom = 30.320007
 theme_override_font_sizes/font_size = 32
 text = "JUGAR"
 flat = true
@@ -58,11 +64,6 @@ position = Vector2(208, 176)
 scale = Vector2(0.40234375, 0.40234375)
 texture = ExtResource("4_wu84c")
 
-[node name="Choice" type="Sprite2D" parent="."]
-position = Vector2(120, 344)
-scale = Vector2(0.69204164, 0.69204164)
-texture = ExtResource("4_8ln24")
-
-[connection signal="pressed" from="CanvasLayer/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/Choice/PlayButton" to="." method="_on_play_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/QuitButton" to="." method="_on_quit_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/ProfileButton" to="." method="_on_profile_button_pressed"]

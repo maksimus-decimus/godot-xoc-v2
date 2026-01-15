@@ -8,4 +8,5 @@ func _ready() -> void:
 	Global.selected_map = 0
 
 func _on_start_button_pressed() -> void:
-	SceneTransition.loading_screen_to_scene("res://scenes/game.tscn", 3.0)
+	UISounds.play_select()
+	SceneTransition.loading_screen_to_scene("res://scenes/game.tscn")

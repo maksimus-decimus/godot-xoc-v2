@@ -79,9 +79,11 @@ func _process(_delta: float) -> void:
 	# Navegación y confirmación para P1
 	if not p1_confirmed:
 		if Input.is_action_just_pressed("p1_left"):
+			UISounds.play_slide()
 			p1_character_index = 0  # Don
 			update_p1_visuals()
 		elif Input.is_action_just_pressed("p1_right"):
+			UISounds.play_slide()
 			p1_character_index = 1  # Ishmael
 			update_p1_visuals()
 		elif Input.is_action_just_pressed("p1_hit"):
@@ -90,15 +92,18 @@ func _process(_delta: float) -> void:
 	# Navegación y confirmación para P2 (solo si P1 ya confirmó)
 	if p1_confirmed and not p2_confirmed:
 		if Input.is_action_just_pressed("p2_left"):
+			UISounds.play_slide()
 			p2_character_index = 0  # Don
 			update_p2_visuals()
 		elif Input.is_action_just_pressed("p2_right"):
+			UISounds.play_slide()
 			p2_character_index = 1  # Ishmael
 			update_p2_visuals()
 		elif Input.is_action_just_pressed("p2_hit"):
 			confirm_p2()
 
 func select_character_by_click(character_index: int) -> void:
+	UISounds.play_slide()
 	if not p1_confirmed:
 		p1_character_index = character_index
 		update_p1_visuals()
@@ -107,6 +112,7 @@ func select_character_by_click(character_index: int) -> void:
 		update_p2_visuals()
 
 func confirm_p1() -> void:
+	UISounds.play_select()
 	p1_confirmed = true
 	print("P1 confirmó: ", ["Don", "Ishmael"][p1_character_index])
 	
@@ -125,6 +131,7 @@ func confirm_p1() -> void:
 	print("Ahora es turno de P2. Navega con ←/→")
 
 func confirm_p2() -> void:
+	UISounds.play_select()
 	p2_confirmed = true
 	print("P2 confirmó: ", ["Don", "Ishmael"][p2_character_index])
 	
@@ -137,6 +144,7 @@ func confirm_p2() -> void:
 		continue_button.visible = true
 
 func cancel_selection() -> void:
+	UISounds.play_cancel()
 	print("Selección cancelada. Reiniciando...")
 	
 	# Resetear todo
@@ -217,6 +225,8 @@ func update_big_character_right(character_index: int) -> void:
 func _on_continue_button_pressed() -> void:
 	if not (p1_confirmed and p2_confirmed):
 		return
+	
+	UISounds.play_select()
 	
 	# Guardar selecciones en Global
 	Global.player1_character = p1_character_index

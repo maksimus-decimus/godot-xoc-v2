@@ -3,22 +3,22 @@ extends Node
 # Configuración del juego
 const MAX_HP = 100
 const MAX_LIVES = 3
-const PLAYER_SPEED = 300
-const SPRINT_SPEED = 500
-const JUMP_VELOCITY = -600
-const WALL_JUMP_VELOCITY = Vector2(400, -550)
-const GRAVITY = 1500
+const PLAYER_SPEED = 600
+const SPRINT_SPEED = 1000
+const JUMP_VELOCITY = -1200
+const WALL_JUMP_VELOCITY = Vector2(800, -1100)
+const GRAVITY = 3000
 const DOUBLE_TAP_TIME = 0.3
-const INITIAL_BALL_SPEED = 800
-const BALL_SPEED_INCREMENT = 150
-const MAX_BALL_SPEED = 2000
+const INITIAL_BALL_SPEED = 1600
+const BALL_SPEED_INCREMENT = 300
+const MAX_BALL_SPEED = 4000
 const BASE_DAMAGE = 25
-const KNOCKBACK_FORCE = 400
+const KNOCKBACK_FORCE = 800
 const INVULNERABILITY_TIME = 0.5
 
 # Umbrales de velocidad para sonidos de golpe
-const WEAK_THRESHOLD = 1000
-const MEDIUM_THRESHOLD = 1500
+const WEAK_THRESHOLD = 2000
+const MEDIUM_THRESHOLD = 3000
 
 # Selección de personajes y mapa
 var player1_character: int = 0
