@@ -30,6 +30,9 @@ var tap_direction: float = 0.0
 # Sonidos de daño
 var hit_sounds: Array[AudioStream] = []
 
+# Sonidos de ataque por personaje
+var attack_sounds: Array[String] = []
+
 # Offsets ajustables desde el Inspector (Y negativo = arriba, positivo = abajo)
 @export_group("Sprite Offsets")
 @export var idle_offset: Vector2 = Vector2(0, 0)
@@ -149,6 +152,18 @@ func play_random_hit_sound() -> void:
 func setup_character() -> void:
 	# Configurar apariencia según personaje seleccionado
 	var character = Global.player1_character if player_id == 1 else Global.player2_character
+	
+	# Cargar sonidos de ataque según personaje
+	attack_sounds.clear()
+	if character == 0:  # Don Quixote
+		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s2_10301_1.wav")
+		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s3_10301_1_1.wav")
+		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s3_10301_1_2.wav")
+		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s3_10301_1_3.wav")
+	elif character == 1:  # Ishmael (si tiene sonidos en el futuro)
+		pass  # Por ahora no tiene sonidos de ataque
+	
+	print("Player ", player_id, " tiene ", attack_sounds.size(), " sonidos de ataque")
 	
 	if not has_sprites:
 		# Usar placeholder de colores
@@ -353,6 +368,12 @@ func hit() -> void:
 	is_hitting = true
 	hit_area.monitoring = true
 	hit_indicator.visible = true
+	
+	# Reproducir sonido de ataque aleatorio si hay sonidos disponibles
+	if attack_sounds.size() > 0:
+		var random_attack = attack_sounds[randi() % attack_sounds.size()]
+		audio_player.stream = load(random_attack)
+		audio_player.play()
 	
 	# Posicionar el área de golpe en la dirección actual
 	update_hit_area_position()

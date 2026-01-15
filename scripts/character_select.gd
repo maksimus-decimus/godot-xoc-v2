@@ -1,5 +1,30 @@
 extends Node2D
 
+# Audio players para sonidos de selección
+var char_select_audio: AudioStreamPlayer
+var char_voice_audio: AudioStreamPlayer
+
+# Sonidos de confirmación
+const P1_CONFIRM_SOUNDS = [
+	"res://sound/sfx/menu_sounds/char_select/selectconfirm.p1.3.wav",
+	"res://sound/sfx/menu_sounds/char_select/selectconfirm.alt.p1.wav"
+]
+
+const P2_CONFIRM_SOUNDS = [
+	"res://sound/sfx/menu_sounds/char_select/selectconfirm.p2.3.wav",
+	"res://sound/sfx/menu_sounds/char_select/selectconfirm.alt.p2.wav"
+]
+
+const ALT_CONFIRM_SOUNDS = [
+	"res://sound/sfx/menu_sounds/char_select/selectconfirm.alt.wav"
+]
+
+# Voces intro de personajes
+const CHARACTER_INTRO_VOICES = [
+	"res://sound/sfx/players/don_quixote/don_intro.wav",  # Don Quixote (index 0)
+	"res://sound/sfx/players/ishmael/ishmael_intro.wav"   # Ishmael (index 1)
+]
+
 # Referencias a TextureRect de fondo
 @onready var char_base = $CharBase
 @onready var p1_p2_fondo = $P1P2Fondo
@@ -37,6 +62,13 @@ var selector_positions = [
 
 func _ready() -> void:
 	MusicManager.play_music(MusicManager.CHAR_SELECT_MUSIC)
+	
+	# Crear audio players para sonidos de confirmación y voces
+	char_select_audio = AudioStreamPlayer.new()
+	add_child(char_select_audio)
+	
+	char_voice_audio = AudioStreamPlayer.new()
+	add_child(char_voice_audio)
 	
 	# Ocultar personajes grandes y botón continuar al inicio
 	if character_big_l:
@@ -113,6 +145,16 @@ func select_character_by_click(character_index: int) -> void:
 
 func confirm_p1() -> void:
 	UISounds.play_select()
+	
+	# Reproducir sonido de confirmación P1
+	var random_confirm = P1_CONFIRM_SOUNDS[randi() % P1_CONFIRM_SOUNDS.size()]
+	char_select_audio.stream = load(random_confirm)
+	char_select_audio.play()
+	
+	# Reproducir voz del personaje simultáneamente
+	char_voice_audio.stream = load(CHARACTER_INTRO_VOICES[p1_character_index])
+	char_voice_audio.play()
+	
 	p1_confirmed = true
 	print("P1 confirmó: ", ["Don", "Ishmael"][p1_character_index])
 	
@@ -132,6 +174,16 @@ func confirm_p1() -> void:
 
 func confirm_p2() -> void:
 	UISounds.play_select()
+	
+	# Reproducir sonido de confirmación P2
+	var random_confirm = P2_CONFIRM_SOUNDS[randi() % P2_CONFIRM_SOUNDS.size()]
+	char_select_audio.stream = load(random_confirm)
+	char_select_audio.play()
+	
+	# Reproducir voz del personaje simultáneamente
+	char_voice_audio.stream = load(CHARACTER_INTRO_VOICES[p2_character_index])
+	char_voice_audio.play()
+	
 	p2_confirmed = true
 	print("P2 confirmó: ", ["Don", "Ishmael"][p2_character_index])
 	
