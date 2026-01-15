@@ -1,24 +1,23 @@
-[gd_scene load_steps=24 format=3 uid="uid://c3kq45y0o6jlw"]
+[gd_scene load_steps=23 format=3 uid="uid://c3kq45y0o6jlw"]
 
 [ext_resource type="Script" uid="uid://uto7ou36b7yl" path="res://scripts/game_manager.gd" id="1_f5vmu"]
 [ext_resource type="Script" uid="uid://bsgf5nbf6qoyv" path="res://scripts/player.gd" id="2_b7xqo"]
-[ext_resource type="Texture2D" uid="uid://ct0beb5g4pgrk" path="res://assets/background/Stage_1.png" id="2_gee14"]
+[ext_resource type="Texture2D" uid="uid://dbfnxwe7gfrad" path="res://assets/background/stage_1_new.png" id="2_ir15t"]
 [ext_resource type="Texture2D" uid="uid://dp1h7pp7bfnuf" path="res://assets/players/don_quixote/Sprites/idle.png" id="2_preview"]
 [ext_resource type="Texture2D" uid="uid://dp5n4adnshfst" path="res://assets/msc/bola1.png" id="3_ball"]
 [ext_resource type="Script" uid="uid://doy5hsbkhii0i" path="res://scripts/ball.gd" id="3_dkw5c"]
 [ext_resource type="Texture2D" uid="uid://dxd7au3jp7uq2" path="res://assets/msc/bola_golpe.png" id="4_hit"]
 [ext_resource type="PackedScene" uid="uid://cy1i6pbfawc4k" path="res://scenes/ui/hud.tscn" id="4_pj8yw"]
-[ext_resource type="PackedScene" path="res://scenes/pause_menu.tscn" id="5_pause"]
-[ext_resource type="AudioStream" uid="uid://b21x1nqml55mq" path="res://sound/sfx/golpe/weak_hit.wav" id="5_weak"]
-[ext_resource type="AudioStream" uid="uid://dmyi14f31qcbd" path="res://sound/sfx/golpe/medium_hit.wav" id="6_medium"]
-[ext_resource type="AudioStream" uid="uid://dr4j8g66vu5u0" path="res://sound/sfx/golpe/strong_hit.wav" id="7_strong"]
+[ext_resource type="PackedScene" uid="uid://cxn5y3h8xt7c0" path="res://scenes/pause_menu.tscn" id="5_pause"]
 [ext_resource type="Texture2D" uid="uid://c1b0ssu1n4a0l" path="res://assets/msc/Showtime.png" id="12_dinhu"]
+[ext_resource type="Texture2D" uid="uid://u3clgtx4agwj" path="res://assets/msc/showtime_plain01.png" id="12_ir15t"]
+[ext_resource type="Texture2D" uid="uid://c782h8y06xkgh" path="res://assets/msc/showtime_glow01.png" id="13_ca42v"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
-size = Vector2(64, 80)
+size = Vector2(56, 121)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
-size = Vector2(76.111115, 87)
+size = Vector2(137.03708, 144.5)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
 radius = 16.0
@@ -50,6 +49,18 @@ region = Rect2(4840, 0, 1210, 327)
 animations = [{
 "frames": [{
 "duration": 1.0,
+"texture": ExtResource("12_ir15t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ir15t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ir15t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_ca42v")
+}, {
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_kvuet")
 }, {
 "duration": 1.0,
@@ -76,14 +87,15 @@ script = ExtResource("1_f5vmu")
 position = Vector2(640, 360)
 
 [node name="TextureRect" type="TextureRect" parent="."]
-offset_right = 1284.0
-offset_bottom = 869.0
-texture = ExtResource("2_gee14")
+offset_left = -88.0
+offset_top = -176.0
+offset_right = 1352.0
+offset_bottom = 717.0
+texture = ExtResource("2_ir15t")
 expand_mode = 1
-stretch_mode = 6
 
 [node name="Player1" type="CharacterBody2D" parent="." groups=["players"]]
-position = Vector2(200, 471)
+position = Vector2(200, 520)
 collision_mask = 14
 script = ExtResource("2_b7xqo")
 idle_offset = Vector2(0, -120)
@@ -95,14 +107,14 @@ scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_preview")
 
 [node name="ColorRect" type="ColorRect" parent="Player1/VisualContainer"]
-offset_left = -32.0
-offset_top = -32.0
-offset_right = 32.0
-offset_bottom = 32.0
+offset_left = -40.0
+offset_top = -15.0
+offset_right = 24.0
+offset_bottom = 89.0
 color = Color(1, 0, 0, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player1"]
-position = Vector2(0, 8)
+position = Vector2(-8, 33)
 shape = SubResource("RectangleShape2D_player")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player1"]
@@ -113,17 +125,16 @@ collision_mask = 2
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player1/HitArea"]
-position = Vector2(-2.0999908, 3.5)
+position = Vector2(26.399994, 9.5)
 scale = Vector2(1.08, 1)
 shape = SubResource("RectangleShape2D_hit")
 
 [node name="HitIndicator" type="ColorRect" parent="Player1/HitArea"]
-visible = false
 modulate = Color(1, 1, 0, 0)
-offset_left = -40.0
-offset_top = -40.0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -32.0
+offset_top = -55.0
+offset_right = 88.0
+offset_bottom = 74.0
 
 [node name="Player2" type="CharacterBody2D" parent="." groups=["players"]]
 position = Vector2(1080, 360)
@@ -133,20 +144,21 @@ player_id = 2
 idle_offset = Vector2(0, -120)
 
 [node name="VisualContainer" type="Node2D" parent="Player2"]
+position = Vector2(0, -32)
 
 [node name="Sprite2D" type="Sprite2D" parent="Player2/VisualContainer"]
-visible = false
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("2_preview")
 
 [node name="ColorRect" type="ColorRect" parent="Player2/VisualContainer"]
-offset_left = -32.0
-offset_top = -32.0
-offset_right = 32.0
-offset_bottom = 32.0
+offset_left = -16.0
+offset_top = -56.0
+offset_right = 40.0
+offset_bottom = 64.0
 color = Color(0, 0.5, 1, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player2"]
+position = Vector2(12, 0)
 shape = SubResource("RectangleShape2D_player")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player2"]
@@ -157,15 +169,16 @@ collision_mask = 2
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Player2/HitArea"]
+position = Vector2(-27.481445, -7.75)
 shape = SubResource("RectangleShape2D_hit")
 
 [node name="HitIndicator" type="ColorRect" parent="Player2/HitArea"]
 visible = false
 modulate = Color(1, 1, 0, 0)
-offset_left = -40.0
-offset_top = -40.0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -96.0
+offset_top = -80.0
+offset_right = 8.0
+offset_bottom = 64.0
 
 [node name="Ball" type="CharacterBody2D" parent="."]
 position = Vector2(654, 503)
@@ -185,15 +198,6 @@ texture = ExtResource("4_hit")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Ball"]
 shape = SubResource("CircleShape2D_ball")
 
-[node name="WeakSound" type="AudioStreamPlayer" parent="Ball"]
-stream = ExtResource("5_weak")
-
-[node name="MediumSound" type="AudioStreamPlayer" parent="Ball"]
-stream = ExtResource("6_medium")
-
-[node name="StrongSound" type="AudioStreamPlayer" parent="Ball"]
-stream = ExtResource("7_strong")
-
 [node name="Walls" type="StaticBody2D" parent="."]
 collision_layer = 4
 collision_mask = 0
@@ -203,7 +207,7 @@ position = Vector2(640, -20)
 shape = SubResource("RectangleShape2D_wall")
 
 [node name="Floor" type="CollisionShape2D" parent="Walls"]
-position = Vector2(640, 650)
+position = Vector2(640, 672)
 shape = SubResource("RectangleShape2D_wall")
 
 [node name="LeftWall" type="CollisionShape2D" parent="Walls"]
@@ -225,7 +229,8 @@ offset_right = -17.0
 position = Vector2(640, 192)
 scale = Vector2(0.5, 0.5)
 sprite_frames = SubResource("SpriteFrames_ssvqc")
-frame = 4
-frame_progress = 0.86627877
+frame_progress = 0.54861957
+speed_scale = 1.5
 
 [node name="PauseMenu" parent="." instance=ExtResource("5_pause")]
+visible = false

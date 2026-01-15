@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cxn5y3h8xt7c0"]
+[gd_scene load_steps=3 format=3 uid="uid://cxn5y3h8xt7c0"]
 
-[ext_resource type="Script" path="res://scripts/pause_menu.gd" id="1_pause_menu_script"]
+[ext_resource type="Script" uid="uid://7pgjkoxq3t74" path="res://scripts/pause_menu.gd" id="1_pause_menu_script"]
+[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="2_myx47"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 process_mode = 3
@@ -27,6 +28,7 @@ layout_mode = 2
 [node name="PauseLabel" type="Label" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_fonts/font = ExtResource("2_myx47")
 theme_override_font_sizes/font_size = 48
 text = "PAUSA"
 horizontal_alignment = 1
@@ -38,16 +40,30 @@ layout_mode = 2
 [node name="ContinueButton" type="Button" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_myx47")
 theme_override_font_sizes/font_size = 32
-flat = true
 text = "Continuar"
+flat = true
 
 [node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_myx47")
 theme_override_font_sizes/font_size = 32
-flat = true
 text = "Salir al Menú"
+flat = true
+
+[node name="Spacer2" type="Control" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="DebugButton" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(300, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_myx47")
+theme_override_font_sizes/font_size = 24
+text = "DEBUG: One-Hit Kill OFF"
 
 [connection signal="pressed" from="CenterContainer/VBoxContainer/ContinueButton" to="." method="_on_continue_button_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/DebugButton" to="." method="_on_debug_button_pressed"]

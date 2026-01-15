@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://oluk244iqs6o"
+path="res://.godot/imported/post_victory_announcer (1).wav-3c28403dc86c3d3d164553d8e45cb310.sample"
+
+[deps]
+
+source_file="res://sound/announcer/finale/post_victory_announcer (1).wav"
+dest_files=["res://.godot/imported/post_victory_announcer (1).wav-3c28403dc86c3d3d164553d8e45cb310.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

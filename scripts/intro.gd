@@ -14,8 +14,8 @@ func _input(event: InputEvent) -> void:
 
 func _on_video_finished() -> void:
 	# Ir al menú principal cuando termine el video
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")
 
 func skip_intro() -> void:
 	# Saltar al menú principal
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")

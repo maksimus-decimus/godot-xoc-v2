@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bvxo4wqc4l2qy"]
+[gd_scene load_steps=3 format=3 uid="uid://bvxo4wqc4l2qy"]
 
-[ext_resource type="Script" path="res://scripts/map_select.gd" id="1_u7p0p"]
+[ext_resource type="Script" uid="uid://duso6a0h55w67" path="res://scripts/map_select.gd" id="1_u7p0p"]
+[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="2_nqqve"]
 
 [node name="MapSelect" type="Node"]
 script = ExtResource("1_u7p0p")
@@ -23,6 +24,7 @@ anchor_right = 1.0
 offset_top = 50.0
 offset_bottom = 100.0
 grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_nqqve")
 theme_override_font_sizes/font_size = 48
 text = "SELECCIÓN DE MAPA"
 horizontal_alignment = 1

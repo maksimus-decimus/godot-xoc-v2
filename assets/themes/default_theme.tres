@@ -1,0 +1,21 @@
+[gd_resource type="Theme" load_steps=7 format=3]
+
+[ext_resource type="FontFile" path="res://assets/font/Elements.ttf" id="1_elements_font"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_normal"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_hover"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_pressed"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_disabled"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_focus"]
+
+[resource]
+default_font = ExtResource("1_elements_font")
+Button/styles/normal = SubResource("StyleBoxEmpty_normal")
+Button/styles/hover = SubResource("StyleBoxEmpty_hover")
+Button/styles/pressed = SubResource("StyleBoxEmpty_pressed")
+Button/styles/disabled = SubResource("StyleBoxEmpty_disabled")
+Button/styles/focus = SubResource("StyleBoxEmpty_focus")

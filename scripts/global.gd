@@ -3,17 +3,17 @@ extends Node
 # Configuración del juego
 const MAX_HP = 100
 const MAX_LIVES = 3
-const PLAYER_SPEED = 600
-const SPRINT_SPEED = 1000
-const JUMP_VELOCITY = -1200
-const WALL_JUMP_VELOCITY = Vector2(800, -1100)
-const GRAVITY = 3000
+const PLAYER_SPEED = 570
+const SPRINT_SPEED = 950
+const JUMP_VELOCITY = -1140
+const WALL_JUMP_VELOCITY = Vector2(760, -1045)
+const GRAVITY = 2850
 const DOUBLE_TAP_TIME = 0.3
 const INITIAL_BALL_SPEED = 1600
 const BALL_SPEED_INCREMENT = 300
 const MAX_BALL_SPEED = 4000
 const BASE_DAMAGE = 25
-const KNOCKBACK_FORCE = 800
+const KNOCKBACK_FORCE = 760
 const INVULNERABILITY_TIME = 0.5
 
 # Umbrales de velocidad para sonidos de golpe
@@ -34,6 +34,9 @@ var winner: int = 0
 
 # Control de inicio de juego
 var game_should_start: bool = true
+
+# DEBUG: One-hit kill mode
+var debug_one_hit_kill: bool = false
 
 # Reiniciar el juego
 func reset_game() -> void:

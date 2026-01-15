@@ -25,6 +25,12 @@ const CHARACTER_INTRO_VOICES = [
 	"res://sound/sfx/players/ishmael/ishmael_intro.wav"   # Ishmael (index 1)
 ]
 
+# Nombres de personajes
+const CHARACTER_NAMES = [
+	"DON QUIXOTE",  # index 0
+	"ISHMAEL"       # index 1
+]
+
 # Referencias a TextureRect de fondo
 @onready var char_base = $CharBase
 @onready var p1_p2_fondo = $P1P2Fondo
@@ -43,6 +49,14 @@ const CHARACTER_INTRO_VOICES = [
 
 # UI
 @onready var continue_button = $CanvasLayer/ContinueButton
+
+# Referencias a contenedores y labels de nombres
+@onready var nom_l = $NOM_L
+@onready var nom_r = $NOM_R
+@onready var nom_l_don = $NOM_L/Nombre_DON
+@onready var nom_l_ish = $NOM_L/Nom_ISHMAEL
+@onready var nom_r_don = $NOM_R/Nombre_DONL
+@onready var nom_r_ish = $NOM_R/Nom_ISHMAEL2
 
 # Botones invisibles para detectar hover/click
 @onready var don_button = $CharacterIcons/DonButton
@@ -70,13 +84,23 @@ func _ready() -> void:
 	char_voice_audio = AudioStreamPlayer.new()
 	add_child(char_voice_audio)
 	
-	# Ocultar personajes grandes y botón continuar al inicio
+	# Ocultar personajes grandes, nombres y botón continuar al inicio
 	if character_big_l:
 		for child in character_big_l.get_children():
 			child.visible = false
 	if character_big_r:
 		for child in character_big_r.get_children():
 			child.visible = false
+	
+	# Ocultar todos los nombres al inicio
+	if nom_l_don:
+		nom_l_don.visible = false
+	if nom_l_ish:
+		nom_l_ish.visible = false
+	if nom_r_don:
+		nom_r_don.visible = false
+	if nom_r_ish:
+		nom_r_ish.visible = false
 	
 	if continue_button:
 		continue_button.visible = false
@@ -158,6 +182,18 @@ func confirm_p1() -> void:
 	p1_confirmed = true
 	print("P1 confirmó: ", ["Don", "Ishmael"][p1_character_index])
 	
+	# Mostrar nombre del personaje de P1
+	if p1_character_index == 0:  # Don Quixote
+		if nom_l_don:
+			nom_l_don.visible = true
+		if nom_l_ish:
+			nom_l_ish.visible = false
+	else:  # Ishmael
+		if nom_l_ish:
+			nom_l_ish.visible = true
+		if nom_l_don:
+			nom_l_don.visible = false
+	
 	# Cambiar color del selector P1 a verde (confirmado)
 	if p1_selector:
 		p1_selector.modulate = Color(0.5, 1, 0.5)  # Verde claro
@@ -186,6 +222,18 @@ func confirm_p2() -> void:
 	
 	p2_confirmed = true
 	print("P2 confirmó: ", ["Don", "Ishmael"][p2_character_index])
+	
+	# Mostrar nombre del personaje de P2
+	if p2_character_index == 0:  # Don Quixote
+		if nom_r_don:
+			nom_r_don.visible = true
+		if nom_r_ish:
+			nom_r_ish.visible = false
+	else:  # Ishmael
+		if nom_r_ish:
+			nom_r_ish.visible = true
+		if nom_r_don:
+			nom_r_don.visible = false
 	
 	# Cambiar color del selector P2 a verde (confirmado)
 	if p2_selector:
@@ -222,6 +270,16 @@ func cancel_selection() -> void:
 	if character_big_r:
 		for child in character_big_r.get_children():
 			child.visible = false
+	
+	# Ocultar todos los nombres
+	if nom_l_don:
+		nom_l_don.visible = false
+	if nom_l_ish:
+		nom_l_ish.visible = false
+	if nom_r_don:
+		nom_r_don.visible = false
+	if nom_r_ish:
+		nom_r_ish.visible = false
 	
 	# Ocultar botón continuar
 	if continue_button:
@@ -294,3 +352,7 @@ func _on_continue_button_pressed() -> void:
 	
 	# Cargar escena de selección de mapa
 	SceneTransition.loading_screen_to_scene("res://scenes/map_select.tscn")
+
+func _on_back_button_pressed() -> void:
+	UISounds.play_cancel()
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")

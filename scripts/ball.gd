@@ -3,9 +3,11 @@ extends CharacterBody2D
 @onready var sprite = $Sprite2D
 @onready var hit_sprite = $HitSprite
 @onready var collision_shape = $CollisionShape2D
-@onready var weak_sound = $WeakSound
-@onready var medium_sound = $MediumSound
-@onready var strong_sound = $StrongSound
+
+# Arrays de variantes de sonidos
+var weak_sounds: Array[AudioStream] = []
+var medium_sounds: Array[AudioStream] = []
+var strong_sounds: Array[AudioStream] = []
 
 @export var ball_scale: float = 1.0  # Escala de la pelota (ajustable desde Inspector)
 @export var rotation_speed: float = 3.0  # Velocidad de rotación
@@ -19,6 +21,19 @@ signal ball_hit_player(player_id: int, damage: float)
 signal ball_speed_changed(new_speed: float)
 
 func _ready() -> void:
+	# Cargar variantes de sonidos de golpe
+	weak_sounds.clear()
+	weak_sounds.append(load("res://sound/sfx/golpe/weak_hit.wav"))
+	weak_sounds.append(load("res://sound/sfx/golpe/weak_smash.wav"))
+	
+	medium_sounds.clear()
+	medium_sounds.append(load("res://sound/sfx/golpe/medium_hit.wav"))
+	medium_sounds.append(load("res://sound/sfx/golpe/medium_smash.wav"))
+	
+	strong_sounds.clear()
+	strong_sounds.append(load("res://sound/sfx/golpe/strong_hit.wav"))
+	strong_sounds.append(load("res://sound/sfx/golpe/strong_smash.wav"))
+	
 	# Dirección inicial aleatoria
 	randomize()
 	var angle = randf_range(0, TAU)
@@ -63,6 +78,10 @@ func _physics_process(delta: float) -> void:
 			direction = velocity.normalized()
 
 func calculate_damage() -> float:
+	# DEBUG: One-hit kill mode
+	if Global.debug_one_hit_kill:
+		return 999.0
+	
 	# El daño escala con la velocidad
 	var speed_ratio = speed / Global.INITIAL_BALL_SPEED
 	return Global.BASE_DAMAGE * speed_ratio
@@ -115,15 +134,24 @@ func update_color() -> void:
 		sprite.modulate = Color.RED
 
 func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> void:
+	var audio_player = AudioStreamPlayer.new()
+	add_child(audio_player)
+	
 	if current_speed < Global.WEAK_THRESHOLD:
-		# Golpe débil
-		weak_sound.play()
+		# Golpe débil - elegir variante aleatoria
+		var random_weak = weak_sounds[randi() % weak_sounds.size()]
+		audio_player.stream = random_weak
+		audio_player.play()
 	elif current_speed < Global.MEDIUM_THRESHOLD:
-		# Golpe medio
-		medium_sound.play()
+		# Golpe medio - elegir variante aleatoria
+		var random_medium = medium_sounds[randi() % medium_sounds.size()]
+		audio_player.stream = random_medium
+		audio_player.play()
 	else:
-		# Golpe fuerte - efecto dramático
-		strong_sound.play()
+		# Golpe fuerte - elegir variante aleatoria
+		var random_strong = strong_sounds[randi() % strong_sounds.size()]
+		audio_player.stream = random_strong
+		audio_player.play()
 		# Llamar screen shake con misma duración que la congelación
 		var game_manager = get_parent()
 		if game_manager and game_manager.has_method("screen_shake"):

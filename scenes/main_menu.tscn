@@ -1,45 +1,60 @@
-[gd_scene load_steps=5 format=3 uid="uid://b4d3q7ybw8xqy"]
+[gd_scene load_steps=6 format=3 uid="uid://b4d3q7ybw8xqy"]
 
 [ext_resource type="Script" uid="uid://dd1357fybtlw6" path="res://scripts/main_menu.gd" id="1_1n7cy"]
-[ext_resource type="Texture2D" uid="uid://7yekx1gn2x1n" path="res://assets/background/Menu.png" id="2_ekxnf"]
+[ext_resource type="Texture2D" uid="uid://gf7tntcphe84" path="res://assets/background/NewMENU.png" id="3_wu84c"]
 [ext_resource type="Texture2D" uid="uid://b3rder64upcpb" path="res://assets/msc/choice.png" id="4_8ln24"]
-[ext_resource type="Texture2D" uid="uid://chg6xbxl1dc6g" path="res://assets/msc/Titulo_juego_logo.png" id="4_wu84c"]
+[ext_resource type="Texture2D" uid="uid://d4ipbm84n4ddn" path="res://assets/background/Título 2.png" id="4_rtw2f"]
+[ext_resource type="FontFile" path="res://assets/font/Elements.ttf" id="5_font"]
 
 [node name="MainMenu" type="Node"]
 script = ExtResource("1_1n7cy")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Choice" type="Sprite2D" parent="CanvasLayer"]
+[node name="PlayChoice" type="Sprite2D" parent="CanvasLayer"]
 position = Vector2(120, 344)
 scale = Vector2(0.69204164, 0.69204164)
 texture = ExtResource("4_8ln24")
 
-[node name="PlayButton" type="Button" parent="CanvasLayer/Choice"]
+[node name="PlayButton" type="Button" parent="CanvasLayer/PlayChoice"]
 offset_left = -115.599976
 offset_top = -34.679993
 offset_right = 184.40002
 offset_bottom = 30.320007
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 32
 text = "JUGAR"
 flat = true
 
-[node name="QuitButton" type="Button" parent="CanvasLayer"]
-offset_left = 16.0
-offset_top = 384.0
-offset_right = 316.0
-offset_bottom = 449.0
+[node name="QuitChoice" type="Sprite2D" parent="CanvasLayer"]
+position = Vector2(120, 496)
+scale = Vector2(0.69204164, 0.69204164)
+texture = ExtResource("4_8ln24")
+
+[node name="QuitButton" type="Button" parent="CanvasLayer/QuitChoice"]
+offset_left = -115.599976
+offset_top = -34.679993
+offset_right = 184.40002
+offset_bottom = 30.320007
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 32
 text = "SALIR"
 flat = true
 
-[node name="ProfileButton" type="Button" parent="CanvasLayer"]
-offset_left = 1090.0
-offset_top = 640.0
-offset_right = 1270.0
-offset_bottom = 700.0
+[node name="ProfileChoice" type="Sprite2D" parent="CanvasLayer"]
+position = Vector2(120, 416)
+scale = Vector2(0.692, 0.692)
+texture = ExtResource("4_8ln24")
+
+[node name="ProfileButton" type="Button" parent="CanvasLayer/ProfileChoice"]
+offset_left = -115.60696
+offset_top = -57.803482
+offset_right = 64.39304
+offset_bottom = 2.196518
+scale = Vector2(1.8079222, 1.8079222)
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 18
-text = "Perfil"
+text = "PERFIL"
 flat = true
 
 [node name="ProfileNameLabel" type="Label" parent="CanvasLayer"]
@@ -47,6 +62,7 @@ offset_left = 1050.0
 offset_top = 600.0
 offset_right = 1262.0
 offset_bottom = 630.0
+theme_override_fonts/font = ExtResource("5_font")
 theme_override_font_sizes/font_size = 14
 text = "Sin perfil"
 horizontal_alignment = 2
@@ -55,15 +71,15 @@ horizontal_alignment = 2
 offset_right = 1285.0
 offset_bottom = 720.0
 mouse_filter = 2
-texture = ExtResource("2_ekxnf")
+texture = ExtResource("3_wu84c")
 expand_mode = 1
 stretch_mode = 6
 
 [node name="TituloJuegoLogo" type="Sprite2D" parent="."]
-position = Vector2(208, 176)
+position = Vector2(272, 176)
 scale = Vector2(0.40234375, 0.40234375)
-texture = ExtResource("4_wu84c")
+texture = ExtResource("4_rtw2f")
 
-[connection signal="pressed" from="CanvasLayer/Choice/PlayButton" to="." method="_on_play_button_pressed"]
-[connection signal="pressed" from="CanvasLayer/QuitButton" to="." method="_on_quit_button_pressed"]
-[connection signal="pressed" from="CanvasLayer/ProfileButton" to="." method="_on_profile_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/PlayChoice/PlayButton" to="." method="_on_play_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/QuitChoice/QuitButton" to="." method="_on_quit_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/ProfileChoice/ProfileButton" to="." method="_on_profile_button_pressed"]

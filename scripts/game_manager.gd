@@ -8,6 +8,14 @@ extends Node
 @onready var showtime_sprite = $ShowTime
 @onready var pause_menu = $PauseMenu
 
+# Victory overlay (será creado dinámicamente)
+var victory_overlay: CanvasLayer
+var thats_wrap_label: Label
+var winner_label: Label
+var continue_button: Button
+var finale_audio: AudioStreamPlayer
+var victory_audio: AudioStreamPlayer
+
 const SPAWN_P1 = Vector2(200, 600)
 const SPAWN_P2 = Vector2(1080, 600)
 const SPAWN_BALL = Vector2(640, 300)
@@ -62,6 +70,9 @@ func _ready() -> void:
 	player2.can_move = false
 	ball.set_physics_process(false)
 	
+	# Crear victory overlay
+	_create_victory_overlay()
+	
 	# Iniciar secuencia de intro
 	intro_started = true
 	call_deferred("_start_intro")
@@ -105,6 +116,13 @@ func _on_player_defeated(player_id: int) -> void:
 		respawn_round(player_id)
 
 func respawn_round(defeated_player_id: int) -> void:
+	# Obtener referencia al jugador derrotado
+	var player = player1 if defeated_player_id == 1 else player2
+	
+	# Esperar a que la animación de muerte termine completamente
+	while player.is_dead:
+		await get_tree().process_frame
+	
 	# Desactivar bola
 	ball_active = false
 	ball.visible = false
@@ -113,7 +131,6 @@ func respawn_round(defeated_player_id: int) -> void:
 	await get_tree().create_timer(1.0).timeout
 	
 	# Respawnear jugador
-	var player = player1 if defeated_player_id == 1 else player2
 	var spawn_pos = SPAWN_P1 if defeated_player_id == 1 else SPAWN_P2
 	player.respawn(spawn_pos)
 	
@@ -137,10 +154,12 @@ func _on_ball_speed_changed(new_speed: float) -> void:
 
 func _on_player1_hit_area_entered(body: Node2D) -> void:
 	if body == ball and ball_active:
+		player1.hit_connected = true
 		ball.hit_by_player(player1.global_position, player1)
 
 func _on_player2_hit_area_entered(body: Node2D) -> void:
 	if body == ball and ball_active:
+		player2.hit_connected = true
 		ball.hit_by_player(player2.global_position, player2)
 
 func screen_shake(duration: float = 2.0, intensity: float = 30.0) -> void:
@@ -167,7 +186,39 @@ func screen_shake(duration: float = 2.0, intensity: float = 30.0) -> void:
 	camera.offset = original_offset
 
 func end_game() -> void:
-	SceneTransition.loading_screen_to_scene("res://scenes/victory_screen.tscn")
+	# Activar cámara lenta dramática
+	Engine.time_scale = 0.3
+	
+	# Reproducir los 3 sonidos de finale/1 simultáneamente
+	var finale_sounds = [
+		"res://sound/announcer/finale/1/punch finale.wav",
+		"res://sound/announcer/finale/1/cut_finale.wav",
+		"res://sound/announcer/finale/1/finale_sound.wav"
+	]
+	
+	# Crear un AudioStreamPlayer para cada sonido y reproducirlos todos
+	for sound_path in finale_sounds:
+		var audio = AudioStreamPlayer.new()
+		add_child(audio)
+		audio.stream = load(sound_path)
+		audio.play()
+	
+	# Esperar 2 segundos (ajustado por time_scale)
+	await get_tree().create_timer(2.0).timeout
+	
+	# Bloquear movimiento de jugadores después de la cámara lenta
+	player1.can_move = false
+	player2.can_move = false
+	ball.set_physics_process(false)
+	
+	# Restaurar velocidad normal
+	Engine.time_scale = 1.0
+	
+	# Fase 2: "That's a wrap"
+	await _show_thats_wrap()
+	
+	# Fase 3: Mostrar victoria
+	await _show_victory_overlay()
 
 func toggle_pause() -> void:
 	# Solo permitir pausar si ya han empezado a jugar (después del intro)
@@ -193,6 +244,8 @@ func _on_pause_continue() -> void:
 func _on_pause_quit() -> void:
 	is_paused = false
 	intro_started = false
+	# Resetear el estado del juego
+	Global.reset_game()
 	# Asegurar que el juego se despause antes de cambiar de escena
 	get_tree().paused = false
 	# Volver al menú principal
@@ -261,3 +314,134 @@ func start_intro_sequence() -> void:
 	# Limpiar los reproductores de audio
 	intro_battle_player.queue_free()
 	intro_battle_start_player.queue_free()
+
+func _create_victory_overlay() -> void:
+	# Crear CanvasLayer para el overlay de victoria
+	victory_overlay = CanvasLayer.new()
+	victory_overlay.layer = 100
+	victory_overlay.visible = false
+	add_child(victory_overlay)
+	
+	# Fondo semitransparente
+	var background = ColorRect.new()
+	background.color = Color(0, 0, 0, 0.7)
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	victory_overlay.add_child(background)
+	
+	# Label "That's a wrap" (oculto inicialmente)
+	thats_wrap_label = Label.new()
+	thats_wrap_label.text = "THAT'S A WRAP!"
+	thats_wrap_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	thats_wrap_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	thats_wrap_label.set_anchors_preset(Control.PRESET_CENTER)
+	thats_wrap_label.position = Vector2(-200, -100)
+	thats_wrap_label.size = Vector2(400, 100)
+	thats_wrap_label.add_theme_font_size_override("font_size", 48)
+	thats_wrap_label.visible = false
+	victory_overlay.add_child(thats_wrap_label)
+	
+	# Label del ganador (oculto inicialmente)
+	winner_label = Label.new()
+	winner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	winner_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	winner_label.set_anchors_preset(Control.PRESET_CENTER)
+	winner_label.position = Vector2(-250, -50)
+	winner_label.size = Vector2(500, 100)
+	winner_label.add_theme_font_size_override("font_size", 64)
+	winner_label.visible = false
+	victory_overlay.add_child(winner_label)
+	
+	# Botón continuar
+	continue_button = Button.new()
+	continue_button.text = "CONTINUAR"
+	continue_button.set_anchors_preset(Control.PRESET_CENTER)
+	continue_button.position = Vector2(-100, 100)
+	continue_button.size = Vector2(200, 60)
+	continue_button.add_theme_font_size_override("font_size", 24)
+	continue_button.visible = false
+	continue_button.pressed.connect(_on_victory_continue)
+	victory_overlay.add_child(continue_button)
+
+func _show_thats_wrap() -> void:
+	# Reproducir sonido "That's a wrap"
+	var wrap_audio = AudioStreamPlayer.new()
+	add_child(wrap_audio)
+	wrap_audio.stream = load("res://sound/announcer/finale/2/thats a wrap_finale.wav")
+	wrap_audio.play()
+	
+	# Mostrar overlay y label
+	victory_overlay.visible = true
+	thats_wrap_label.visible = true
+	
+	# Esperar a que termine el audio
+	await wrap_audio.finished
+	
+	# Ocultar "That's a wrap"
+	thats_wrap_label.visible = false
+	
+	# Esperar 1 segundo adicional
+	await get_tree().create_timer(1.0).timeout
+	
+	wrap_audio.queue_free()
+
+func _show_victory_overlay() -> void:
+	# Reproducir sonido de victoria según el ganador
+	victory_audio = AudioStreamPlayer.new()
+	add_child(victory_audio)
+	
+	var winner = Global.winner
+	var victory_files = []
+	
+	if winner == 1:
+		victory_files = [
+			"res://sound/announcer/finale/3 player_victory/p1VICTORY.wav",
+			"res://sound/announcer/finale/3 player_victory/p1VICTORY (2).wav",
+			"res://sound/announcer/finale/3 player_victory/p1VICTORY (3).wav"
+		]
+	else:
+		victory_files = [
+			"res://sound/announcer/finale/3 player_victory/p2VICTORY.wav",
+			"res://sound/announcer/finale/3 player_victory/p2VICTORY (2).wav",
+			"res://sound/announcer/finale/3 player_victory/p2VICTORY (3).wav"
+		]
+	
+	# Reproducir sonido aleatorio de victoria
+	var random_victory = victory_files[randi() % victory_files.size()]
+	victory_audio.stream = load(random_victory)
+	victory_audio.play()
+	
+	# Mostrar ganador
+	winner_label.text = "¡JUGADOR %d GANA!" % winner
+	winner_label.visible = true
+	continue_button.visible = true
+	continue_button.grab_focus()
+	
+	# Esperar a que termine el sonido de victoria, luego reproducir post_victory
+	await victory_audio.finished
+	
+	# Reproducir post_victory aleatorio
+	var post_victory_files = [
+		"res://sound/announcer/finale/post_victory_announcer (1).wav",
+		"res://sound/announcer/finale/post_victory_announcer (2).wav"
+	]
+	var random_post = post_victory_files[randi() % post_victory_files.size()]
+	victory_audio.stream = load(random_post)
+	victory_audio.play()
+
+func _on_victory_continue() -> void:
+	UISounds.play_select()
+	
+	# Ocultar victory overlay
+	if victory_overlay:
+		victory_overlay.visible = false
+	
+	# Actualizar estadísticas del perfil
+	if not UserProfile.current_profile_name.is_empty():
+		var player1_character = Global.player1_character
+		var player_won = Global.winner == 1
+		UserProfile.update_stats(player_won, player1_character)
+	
+	# Resetear y volver al menú
+	Global.reset_game()
+	Engine.time_scale = 1.0  # Asegurar que el tiempo vuelva a normal
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")

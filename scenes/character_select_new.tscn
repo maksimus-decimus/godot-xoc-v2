@@ -126,13 +126,110 @@ texture = ExtResource("8_p1_select")
 expand_mode = 1
 
 [node name="P2Selector" type="TextureRect" parent="Selectors"]
-visible = false
-offset_left = 1.0
-offset_top = -2.0
-offset_right = 1279.0
-offset_bottom = 716.0
+offset_left = 2.0
+offset_right = 1280.0
+offset_bottom = 718.0
 texture = ExtResource("9_p2_select")
 expand_mode = 1
+
+[node name="NOM_R" type="Label" parent="."]
+offset_left = -246.498
+offset_top = 2943.1006
+offset_right = -246.498
+offset_bottom = 2943.1006
+rotation = 0.2928967
+scale = Vector2(1.534556, 1.534556)
+
+[node name="Nom_ISHMAEL2" type="Label" parent="NOM_R"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 241.50975
+offset_top = -2033.8385
+offset_right = 471.69943
+offset_bottom = -1985.1246
+grow_horizontal = 2
+grow_vertical = 0
+rotation = -0.14554527
+scale = Vector2(0.93265593, 0.93265593)
+theme_override_fonts/font = ExtResource("9_bpvp5")
+theme_override_font_sizes/font_size = 24
+text = "ISHMAEL"
+horizontal_alignment = 1
+
+[node name="Nombre_DONL" type="Label" parent="NOM_R"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 228.04121
+offset_top = -2024.3318
+offset_right = 540.2391
+offset_bottom = -1980.1392
+grow_horizontal = 2
+grow_vertical = 0
+rotation = -0.15733366
+scale = Vector2(0.8155902, 0.77855045)
+theme_override_fonts/font = ExtResource("9_bpvp5")
+theme_override_font_sizes/font_size = 24
+text = "DON QUIXOTE"
+horizontal_alignment = 1
+
+[node name="NOM_L" type="Label" parent="."]
+offset_left = -3.3225555
+offset_top = 1322.7075
+offset_right = -3.3225555
+offset_bottom = 1322.7075
+rotation = 0.14644834
+scale = Vector2(1.238772, 1.238772)
+
+[node name="Nom_ISHMAEL" type="Label" parent="NOM_L"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -126.96801
+offset_top = -633.2318
+offset_right = 103.22169
+offset_bottom = -584.51794
+grow_horizontal = 2
+grow_vertical = 0
+rotation = 0.02550323
+scale = Vector2(1.1888047, 1.1204847)
+theme_override_fonts/font = ExtResource("9_bpvp5")
+theme_override_font_sizes/font_size = 24
+text = "ISHMAEL"
+horizontal_alignment = 1
+
+[node name="Nombre_DON" type="Label" parent="NOM_L"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -74.91459
+offset_top = -634.38196
+offset_right = 100.08541
+offset_bottom = -595.27124
+grow_horizontal = 2
+grow_vertical = 0
+rotation = 0.012712188
+scale = Vector2(1.0785366, 1.0785366)
+theme_override_fonts/font = ExtResource("9_bpvp5")
+theme_override_font_sizes/font_size = 24
+text = "DON QUIXOTE"
+horizontal_alignment = 1
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -169,4 +266,11 @@ theme_override_fonts/font = ExtResource("9_bpvp5")
 theme_override_font_sizes/font_size = 32
 text = "CONTINUAR"
 
+[node name="BackButton" type="Button" parent="CanvasLayer"]
+offset_top = 96.0
+offset_right = 100.0
+offset_bottom = 156.0
+flat = true
+
 [connection signal="pressed" from="CanvasLayer/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/BackButton" to="." method="_on_back_button_pressed"]

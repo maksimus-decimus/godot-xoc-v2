@@ -16,6 +16,7 @@ var invulnerable: bool = false
 var is_dead: bool = false
 var can_move: bool = true
 var last_direction: Vector2 = Vector2.RIGHT
+var hit_connected: bool = false  # Track if hit connected with ball
 
 # Sistema de movimiento avanzado
 var is_sprinting: bool = false
@@ -32,6 +33,9 @@ var hit_sounds: Array[AudioStream] = []
 
 # Sonidos de ataque por personaje
 var attack_sounds: Array[String] = []
+
+# Sonidos de swing (golpe al aire)
+var swing_sounds: Array[AudioStream] = []
 
 # Offsets ajustables desde el Inspector (Y negativo = arriba, positivo = abajo)
 @export_group("Sprite Offsets")
@@ -78,6 +82,10 @@ func load_hit_sounds() -> void:
 	hit_sounds.append(load("res://sound/sfx/get_hit1.wav"))
 	hit_sounds.append(load("res://sound/sfx/get_hit2.wav"))
 	hit_sounds.append(load("res://sound/sfx/get_hit3.wav"))
+	
+	# Cargar sonido de swing
+	swing_sounds.clear()
+	swing_sounds.append(load("res://sound/sfx/golpe/swing.wav"))
 	hit_sounds.append(load("res://sound/sfx/get_hit4.wav"))
 
 func load_character_sprites() -> void:
@@ -153,6 +161,14 @@ func setup_character() -> void:
 	# Configurar apariencia según personaje seleccionado
 	var character = Global.player1_character if player_id == 1 else Global.player2_character
 	
+	# Ajustar hitbox según personaje
+	if character == 0:  # Don Quixote
+		hit_distance = 50.0
+		hit_offset = Vector2(0, 0)
+	elif character == 1:  # Ishmael
+		hit_distance = 70.0  # Más alcance hacia adelante
+		hit_offset = Vector2(10, 0)  # Desplazar un poco más hacia adelante
+	
 	# Cargar sonidos de ataque según personaje
 	attack_sounds.clear()
 	if character == 0:  # Don Quixote
@@ -160,8 +176,11 @@ func setup_character() -> void:
 		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s3_10301_1_1.wav")
 		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s3_10301_1_2.wav")
 		attack_sounds.append("res://sound/sfx/players/don_quixote/attack/battle_s3_10301_1_3.wav")
-	elif character == 1:  # Ishmael (si tiene sonidos en el futuro)
-		pass  # Por ahora no tiene sonidos de ataque
+	elif character == 1:  # Ishmael
+		attack_sounds.append("res://sound/sfx/players/ishmael/attack/battle_s2_10811_1_1.wav")
+		attack_sounds.append("res://sound/sfx/players/ishmael/attack/battle_s2_10811_1_1-01.wav")
+		attack_sounds.append("res://sound/sfx/players/ishmael/attack/battle_s2_10811_1_1-02.wav")
+		attack_sounds.append("res://sound/sfx/players/ishmael/attack/battle_s2_10811_1_2-02.wav")
 	
 	print("Player ", player_id, " tiene ", attack_sounds.size(), " sonidos de ataque")
 	
@@ -366,6 +385,7 @@ func update_sprite_animation(direction_x: float) -> void:
 
 func hit() -> void:
 	is_hitting = true
+	hit_connected = false  # Reset hit detection
 	hit_area.monitoring = true
 	hit_indicator.visible = true
 	
@@ -400,6 +420,13 @@ func hit() -> void:
 	await get_tree().create_timer(0.1).timeout
 	hit_area.monitoring = false
 	hit_indicator.visible = false
+	
+	# Si no conectó con la pelota, reproducir sonido de swing
+	if not hit_connected and swing_sounds.size() > 0:
+		var random_swing = swing_sounds[randi() % swing_sounds.size()]
+		audio_player.stream = random_swing
+		audio_player.play()
+	
 	is_hitting = false
 
 func take_damage(damage: float, knockback_direction: Vector2) -> void:
@@ -454,7 +481,7 @@ func death_animation(knockback_direction: Vector2) -> void:
 	velocity.y = -400  # Impulso hacia arriba
 	
 	# Animación de salto y caída (sin rotación ni fade)
-	var flight_time = 5.0  # Duración de la animación
+	var flight_time = 2.5  # Duración de la animación
 	var elapsed = 0.0
 	
 	while elapsed < flight_time and is_inside_tree():
@@ -473,6 +500,9 @@ func death_animation(knockback_direction: Vector2) -> void:
 			break
 	
 	print("Animación de muerte completada para jugador ", player_id)
+	
+	# Resetear is_dead al final de la animación
+	is_dead = false
 
 func blink_effect() -> void:
 	for i in range(5):
