@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://c3kq45y0o6jlw"]
+[gd_scene load_steps=24 format=3 uid="uid://c3kq45y0o6jlw"]
 
 [ext_resource type="Script" uid="uid://uto7ou36b7yl" path="res://scripts/game_manager.gd" id="1_f5vmu"]
 [ext_resource type="Script" uid="uid://bsgf5nbf6qoyv" path="res://scripts/player.gd" id="2_b7xqo"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://dxd7au3jp7uq2" path="res://assets/msc/bola_golpe.png" id="4_hit"]
 [ext_resource type="PackedScene" uid="uid://cy1i6pbfawc4k" path="res://scenes/ui/hud.tscn" id="4_pj8yw"]
 [ext_resource type="PackedScene" uid="uid://cxn5y3h8xt7c0" path="res://scenes/pause_menu.tscn" id="5_pause"]
+[ext_resource type="Texture2D" uid="uid://ftpljyapvfn5" path="res://assets/hud/thatsawrap.png" id="9_kvuet"]
 [ext_resource type="Texture2D" uid="uid://c1b0ssu1n4a0l" path="res://assets/msc/Showtime.png" id="12_dinhu"]
 [ext_resource type="Texture2D" uid="uid://u3clgtx4agwj" path="res://assets/msc/showtime_plain01.png" id="12_ir15t"]
 [ext_resource type="Texture2D" uid="uid://c782h8y06xkgh" path="res://assets/msc/showtime_glow01.png" id="13_ca42v"]
@@ -233,8 +234,14 @@ shape = SubResource("RectangleShape2D_wall")
 [node name="HUD" parent="CanvasLayer" instance=ExtResource("4_pj8yw")]
 offset_right = -17.0
 
+[node name="Thatsawrap" type="Sprite2D" parent="CanvasLayer"]
+visible = false
+position = Vector2(666, 297)
+scale = Vector2(0.769249, 0.80924904)
+texture = ExtResource("9_kvuet")
+
 [node name="ShowTime" type="AnimatedSprite2D" parent="."]
-position = Vector2(640, 192)
+position = Vector2(640, 279)
 scale = Vector2(0.5, 0.5)
 sprite_frames = SubResource("SpriteFrames_ssvqc")
 frame_progress = 0.54861957

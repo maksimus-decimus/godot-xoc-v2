@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://cy1i6pbfawc4k"]
+[gd_scene load_steps=4 format=3 uid="uid://cy1i6pbfawc4k"]
 
-[ext_resource type="Script" path="res://scripts/hud.gd" id="1_jbwvk"]
+[ext_resource type="Script" uid="uid://ddun5r6vp1nhi" path="res://scripts/hud.gd" id="1_jbwvk"]
+[ext_resource type="Texture2D" uid="uid://bo8krhfc5g7pd" path="res://assets/hud/don_hud_port.png" id="2_bo48s"]
+[ext_resource type="Texture2D" uid="uid://cfiilro2fox3e" path="res://assets/hud/ishm_hud_port.png" id="3_8qguk"]
 
 [node name="HUD" type="Control"]
 layout_mode = 3
@@ -11,6 +13,97 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_jbwvk")
+
+[node name="TitleLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 144.0
+offset_top = 24.0
+offset_right = 664.0
+offset_bottom = 51.0
+theme_override_font_sizes/font_size = 24
+text = "JUGADOR 1"
+
+[node name="HPBar" type="ProgressBar" parent="."]
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 0
+offset_left = 175.0
+offset_top = 69.0
+offset_right = 512.0
+offset_bottom = 99.0
+value = 100.0
+show_percentage = false
+
+[node name="P1Section" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 104.0
+offset_right = 680.0
+offset_bottom = 251.0
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="HPLabel" type="Label" parent="P1Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "HP: 100/100"
+
+[node name="LivesLabel" type="Label" parent="P1Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Vidas: ♥ ♥ ♥"
+
+[node name="ComboLabel" type="Label" parent="P1Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Combo: 0/4"
+
+[node name="TitleLabel2" type="Label" parent="."]
+layout_mode = 0
+offset_left = -120.0
+offset_top = 32.0
+offset_right = 1120.0
+offset_bottom = 59.0
+theme_override_font_sizes/font_size = 24
+text = "JUGADOR 2"
+horizontal_alignment = 2
+
+[node name="HPBar2" type="ProgressBar" parent="."]
+custom_minimum_size = Vector2(300, 30)
+layout_mode = 0
+offset_left = 768.0
+offset_top = 72.0
+offset_right = 1105.0
+offset_bottom = 102.0
+size_flags_horizontal = 8
+value = 100.0
+show_percentage = false
+
+[node name="P2Section" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = -112.0
+offset_top = 112.0
+offset_right = 1128.0
+offset_bottom = 259.0
+size_flags_horizontal = 3
+theme_override_constants/separation = 5
+
+[node name="HPLabel" type="Label" parent="P2Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "HP: 100/100"
+horizontal_alignment = 2
+
+[node name="LivesLabel" type="Label" parent="P2Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Vidas: ♥ ♥ ♥"
+horizontal_alignment = 2
+
+[node name="ComboLabel" type="Label" parent="P2Section"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Combo: 0/4"
+horizontal_alignment = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -33,75 +126,35 @@ mouse_filter = 2
 layout_mode = 2
 theme_override_constants/separation = 200
 
-[node name="P1Section" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 5
-
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P1Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "JUGADOR 1"
-
-[node name="HPBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopBar/P1Section"]
-custom_minimum_size = Vector2(300, 30)
-layout_mode = 2
-value = 100.0
-show_percentage = false
-
-[node name="HPLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P1Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "HP: 100/100"
-
-[node name="LivesLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P1Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Vidas: ♥ ♥ ♥"
-
-[node name="ComboLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P1Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Combo: 0/4"
-
-[node name="P2Section" type="VBoxContainer" parent="MarginContainer/VBoxContainer/TopBar"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 5
-
-[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P2Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "JUGADOR 2"
-horizontal_alignment = 2
-
-[node name="HPBar" type="ProgressBar" parent="MarginContainer/VBoxContainer/TopBar/P2Section"]
-custom_minimum_size = Vector2(300, 30)
-layout_mode = 2
-size_flags_horizontal = 8
-value = 100.0
-show_percentage = false
-
-[node name="HPLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P2Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "HP: 100/100"
-horizontal_alignment = 2
-
-[node name="LivesLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P2Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Vidas: ♥ ♥ ♥"
-horizontal_alignment = 2
-
-[node name="ComboLabel" type="Label" parent="MarginContainer/VBoxContainer/TopBar/P2Section"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Combo: 0/4"
-horizontal_alignment = 2
-
 [node name="BallSpeedLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Velocidad Bola: 200 px/s"
 horizontal_alignment = 1
+
+[node name="DonHudPort_L" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(88, 86.00001)
+scale = Vector2(0.68623483, 0.68623483)
+texture = ExtResource("2_bo48s")
+flip_h = true
+
+[node name="DonHudPort_R" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(1192, 88)
+scale = Vector2(0.68623483, 0.68623483)
+texture = ExtResource("2_bo48s")
+
+[node name="IshmHudPort_R" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(1192.0001, 88)
+scale = Vector2(0.686, 0.686)
+texture = ExtResource("3_8qguk")
+
+[node name="IshmHudPort_L" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(88, 86)
+scale = Vector2(0.686, 0.686)
+texture = ExtResource("3_8qguk")
+flip_h = true

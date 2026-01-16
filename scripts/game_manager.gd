@@ -12,7 +12,7 @@ extends Node
 # Victory overlay (será creado dinámicamente)
 var victory_overlay: CanvasLayer
 var victory_background: ColorRect
-var thats_wrap_label: Label
+var thats_wrap_label: Sprite2D
 var winner_label: Label
 var continue_button: Button
 var finale_audio: AudioStreamPlayer
@@ -301,15 +301,21 @@ func screen_shake(duration: float = 2.0, intensity: float = 30.0) -> void:
 
 func end_game() -> void:
 	# Flash blanco en toda la pantalla
+	var flash_layer = CanvasLayer.new()
+	flash_layer.layer = 200
+	add_child(flash_layer)
 	var flash = ColorRect.new()
 	flash.color = Color.WHITE
 	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(flash)
+	flash_layer.add_child(flash)
 	
 	# Fade out del flash
 	var fade_tween = create_tween()
 	fade_tween.tween_property(flash, "modulate:a", 0.0, 0.5)
-	fade_tween.tween_callback(func(): flash.queue_free())
+	fade_tween.tween_callback(func(): flash_layer.queue_free())
+	
+	# Esperar a que termine el flash
+	await fade_tween.finished
 	
 	# Activar cámara lenta dramática
 	Engine.time_scale = 0.3
@@ -428,9 +434,43 @@ func start_intro_sequence() -> void:
 	if showtime_sprite:
 		showtime_sprite.visible = true
 		showtime_sprite.play()
+		
+		# Obtener la duración del audio
+		var audio_stream = load(random_intro_battle_start) as AudioStream
+		var audio_duration = audio_stream.get_length()
+		
+		# Animación: empezar grande y hacerse pequeño (como si viniera del fondo)
+		showtime_sprite.scale = Vector2(2.25, 2.25)
+		var scale_tween = create_tween()
+		scale_tween.tween_property(showtime_sprite, "scale", Vector2(0.75, 0.75), audio_duration)
 	
 	intro_battle_start_player.stream = load(random_intro_battle_start)
 	intro_battle_start_player.play()
+	
+	# Flash 1 - Inmediato
+	var flash1_layer = CanvasLayer.new()
+	flash1_layer.layer = 200
+	add_child(flash1_layer)
+	var flash1 = ColorRect.new()
+	flash1.color = Color.WHITE
+	flash1.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash1_layer.add_child(flash1)
+	var flash1_tween = create_tween()
+	flash1_tween.tween_property(flash1, "modulate:a", 0.0, 0.2)
+	flash1_tween.tween_callback(func(): flash1_layer.queue_free())
+	
+	# Flash 2 - Después de 0.3 segundos
+	await get_tree().create_timer(0.3, true, false, true).timeout
+	var flash2_layer = CanvasLayer.new()
+	flash2_layer.layer = 200
+	add_child(flash2_layer)
+	var flash2 = ColorRect.new()
+	flash2.color = Color.WHITE
+	flash2.set_anchors_preset(Control.PRESET_FULL_RECT)
+	flash2_layer.add_child(flash2)
+	var flash2_tween = create_tween()
+	flash2_tween.tween_property(flash2, "modulate:a", 0.0, 0.2)
+	flash2_tween.tween_callback(func(): flash2_layer.queue_free())
 	
 	# Esperar 1.5 segundos mientras se muestra ShowTime (con process_always para que funcione aunque esté pausado)
 	var timer = get_tree().create_timer(1.5, true, false, true)
@@ -465,15 +505,11 @@ func _create_victory_overlay() -> void:
 	victory_background.visible = false
 	victory_overlay.add_child(victory_background)
 	
-	# Label "That's a wrap" (oculto inicialmente)
-	thats_wrap_label = Label.new()
-	thats_wrap_label.text = "THAT'S A WRAP!"
-	thats_wrap_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	thats_wrap_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	thats_wrap_label.set_anchors_preset(Control.PRESET_CENTER)
-	thats_wrap_label.position = Vector2(-200, -100)
-	thats_wrap_label.size = Vector2(400, 100)
-	thats_wrap_label.add_theme_font_size_override("font_size", 48)
+	# Sprite "That's a wrap" (oculto inicialmente)
+	thats_wrap_label = Sprite2D.new()
+	thats_wrap_label.texture = load("res://assets/hud/thatsawrap.png")
+	thats_wrap_label.centered = true
+	thats_wrap_label.position = Vector2(640, 360)
 	thats_wrap_label.visible = false
 	victory_overlay.add_child(thats_wrap_label)
 	
@@ -509,6 +545,9 @@ func _show_thats_wrap() -> void:
 	# Mostrar overlay y label (sin fondo oscuro)
 	victory_overlay.visible = true
 	thats_wrap_label.visible = true
+	
+	# Efecto de vibración
+	_vibrate_sprite(thats_wrap_label)
 	
 	# Esperar a que termine el audio
 	await wrap_audio.finished
@@ -628,6 +667,21 @@ func _animate_character_victory(player: Node) -> void:
 		player_sprite.texture = victory_animation_frames[frame_index]
 		frame_index = (frame_index + 1) % victory_animation_frames.size()
 		await get_tree().create_timer(0.15).timeout
+
+func _vibrate_sprite(sprite: Sprite2D) -> void:
+	var original_position = sprite.position
+	var shake_amount = 5.0
+	
+	# Vibrar mientras el sprite esté visible
+	while sprite.visible:
+		sprite.position = original_position + Vector2(
+			randf_range(-shake_amount, shake_amount),
+			randf_range(-shake_amount, shake_amount)
+		)
+		await get_tree().create_timer(0.05).timeout
+	
+	# Restaurar posición original
+	sprite.position = original_position
 
 func _on_victory_continue() -> void:
 	UISounds.play_select()

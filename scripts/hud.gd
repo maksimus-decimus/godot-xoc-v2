@@ -1,20 +1,29 @@
 extends Control
 
-@onready var p1_hp_bar = $MarginContainer/VBoxContainer/TopBar/P1Section/HPBar
-@onready var p1_hp_label = $MarginContainer/VBoxContainer/TopBar/P1Section/HPLabel
-@onready var p1_lives_label = $MarginContainer/VBoxContainer/TopBar/P1Section/LivesLabel
-@onready var p1_combo_label = $MarginContainer/VBoxContainer/TopBar/P1Section/ComboLabel
+@onready var p1_hp_bar = $HPBar
+@onready var p1_hp_label = $P1Section/HPLabel
+@onready var p1_lives_label = $P1Section/LivesLabel
+@onready var p1_combo_label = $P1Section/ComboLabel
 
-@onready var p2_hp_bar = $MarginContainer/VBoxContainer/TopBar/P2Section/HPBar
-@onready var p2_hp_label = $MarginContainer/VBoxContainer/TopBar/P2Section/HPLabel
-@onready var p2_lives_label = $MarginContainer/VBoxContainer/TopBar/P2Section/LivesLabel
-@onready var p2_combo_label = $MarginContainer/VBoxContainer/TopBar/P2Section/ComboLabel
+@onready var p2_hp_bar = $HPBar2
+@onready var p2_hp_label = $P2Section/HPLabel
+@onready var p2_lives_label = $P2Section/LivesLabel
+@onready var p2_combo_label = $P2Section/ComboLabel
 
 @onready var ball_speed_label = $MarginContainer/VBoxContainer/BallSpeedLabel
+
+# Portraits de personajes
+@onready var don_port_l = $DonHudPort_L
+@onready var don_port_r = $DonHudPort_R
+@onready var ishm_port_l = $IshmHudPort_L
+@onready var ishm_port_r = $IshmHudPort_R
 
 func _ready() -> void:
 	p1_hp_bar.max_value = Global.MAX_HP
 	p2_hp_bar.max_value = Global.MAX_HP
+	
+	# Mostrar portraits según el personaje de cada jugador
+	setup_portraits()
 
 func update_hp(player_id: int, current_hp: float, max_hp: float) -> void:
 	if player_id == 1:
@@ -68,3 +77,22 @@ func update_combo(player_id: int, combo: int) -> void:
 			p2_combo_label.modulate = Color.GOLD
 		else:
 			p2_combo_label.modulate = Color.WHITE
+
+func setup_portraits() -> void:
+	# Ocultar todos los portraits primero
+	don_port_l.visible = false
+	don_port_r.visible = false
+	ishm_port_l.visible = false
+	ishm_port_r.visible = false
+	
+	# Mostrar portrait del jugador 1 (lado izquierdo)
+	if Global.player1_character == 0:  # Don Quixote
+		don_port_l.visible = true
+	else:  # Ishmael
+		ishm_port_l.visible = true
+	
+	# Mostrar portrait del jugador 2 (lado derecho)
+	if Global.player2_character == 0:  # Don Quixote
+		don_port_r.visible = true
+	else:  # Ishmael
+		ishm_port_r.visible = true
