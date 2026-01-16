@@ -45,6 +45,14 @@ theme_override_font_sizes/font_size = 32
 text = "Continuar"
 flat = true
 
+[node name="GodModeButton" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(300, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_myx47")
+theme_override_font_sizes/font_size = 24
+text = "God Mode: OFF"
+flat = true
+
 [node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
@@ -65,5 +73,6 @@ theme_override_font_sizes/font_size = 24
 text = "DEBUG: One-Hit Kill OFF"
 
 [connection signal="pressed" from="CenterContainer/VBoxContainer/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/GodModeButton" to="." method="_on_god_mode_button_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/QuitButton" to="." method="_on_quit_button_pressed"]
 [connection signal="pressed" from="CenterContainer/VBoxContainer/DebugButton" to="." method="_on_debug_button_pressed"]

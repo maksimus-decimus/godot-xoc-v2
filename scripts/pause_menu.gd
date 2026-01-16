@@ -4,7 +4,7 @@ signal continue_pressed
 signal quit_pressed
 
 var pausa_audio_player: AudioStreamPlayer
-@onready var debug_button = $CenterContainer/VBoxContainer/DebugButton
+@onready var god_mode_button = $CenterContainer/VBoxContainer/GodModeButton
 
 # Sistema de randomización sin repetición
 var pausa_sounds_pool: Array = []
@@ -60,9 +60,14 @@ func show_pause_menu() -> void:
 	visible = true
 	get_tree().paused = true
 	
-	# Actualizar texto del botón debug
-	if debug_button:
-		debug_button.text = "DEBUG: One-Hit Kill " + ("ON" if Global.debug_one_hit_kill else "OFF")
+	# Actualizar texto del botón God Mode
+	if god_mode_button:
+		if Global.god_mode:
+			god_mode_button.text = "God Mode: ON"
+			god_mode_button.modulate = Color.GREEN
+		else:
+			god_mode_button.text = "God Mode: OFF"
+			god_mode_button.modulate = Color.WHITE
 	
 	# Reproducir sonido aleatorio de pausa (sin repetición)
 	var random_pausa = _get_random_sound(pausa_sounds_pool, _reset_pausa_pool)
@@ -91,10 +96,17 @@ func _on_quit_button_pressed() -> void:
 	hide_pause_menu()
 	quit_pressed.emit()
 
-func _on_debug_button_pressed() -> void:
+func _on_god_mode_button_pressed() -> void:
 	UISounds.play_select()
-	Global.debug_one_hit_kill = not Global.debug_one_hit_kill
+	Global.god_mode = !Global.god_mode
+	
 	# Actualizar texto del botón
-	if debug_button:
-		debug_button.text = "DEBUG: One-Hit Kill " + ("ON" if Global.debug_one_hit_kill else "OFF")
-	print("DEBUG: One-hit kill ", "ACTIVADO" if Global.debug_one_hit_kill else "DESACTIVADO")
+	if god_mode_button:
+		if Global.god_mode:
+			god_mode_button.text = "God Mode: ON"
+			god_mode_button.modulate = Color.GREEN
+		else:
+			god_mode_button.text = "God Mode: OFF"
+			god_mode_button.modulate = Color.WHITE
+	
+	print("God Mode: ", "ACTIVADO" if Global.god_mode else "DESACTIVADO")

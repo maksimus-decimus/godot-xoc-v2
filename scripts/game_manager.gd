@@ -7,6 +7,7 @@ extends Node
 @onready var camera = $Camera2D
 @onready var showtime_sprite = $ShowTime
 @onready var pause_menu = $PauseMenu
+@onready var background = $Mapa_1
 
 # Victory overlay (será creado dinámicamente)
 var victory_overlay: CanvasLayer
@@ -151,6 +152,61 @@ func _on_ball_hit_player(player_id: int, damage: float) -> void:
 
 func _on_ball_speed_changed(new_speed: float) -> void:
 	hud.update_ball_speed(new_speed)
+	update_background_effect(new_speed)
+
+func update_background_effect(speed: float) -> void:
+	if not background:
+		return
+	
+	# Calcular progreso entre MEDIUM (inicio anaranjado) y MAX
+	var progress = clamp((speed - Global.MEDIUM_THRESHOLD) / (Global.MAX_BALL_SPEED - Global.MEDIUM_THRESHOLD), 0.0, 1.0)
+	
+	if speed >= Global.MAX_BALL_SPEED:
+		# Efecto de flash y negativo al llegar al máximo
+		if not background.material or not background.material.shader:
+			var shader_material = ShaderMaterial.new()
+			var shader = Shader.new()
+			shader.code = """
+				shader_type canvas_item;
+				uniform float invert_amount : hint_range(0.0, 1.0) = 1.0;
+				
+				void fragment() {
+					vec4 color = texture(TEXTURE, UV);
+					color.rgb = mix(color.rgb, vec3(1.0) - color.rgb, invert_amount);
+					COLOR = color;
+				}
+			"""
+			shader_material.shader = shader
+			background.material = shader_material
+		
+		# Efecto de flash blanco antes del negativo
+		var flash_tween = create_tween()
+		background.modulate = Color.WHITE
+		flash_tween.tween_property(background, "modulate", Color.WHITE * 2.0, 0.1)
+		flash_tween.tween_property(background, "modulate", Color.WHITE, 0.1)
+		
+		# Aplicar inversión gradualmente
+		var invert_tween = create_tween()
+		invert_tween.tween_method(func(value): 
+			if background.material:
+				background.material.set_shader_parameter("invert_amount", value)
+		, 0.0, 1.0, 0.3)
+		
+	elif speed >= Global.MEDIUM_THRESHOLD:
+		# Fade anaranjado progresivo
+		if background.material:
+			background.material = null
+		
+		# Mezcla de blanco a naranja según progreso (más naranja = más velocidad)
+		# Color naranja intenso que se vuelve más fuerte con la velocidad
+		var orange_intensity = progress
+		var orange_color = Color(1.0, 0.5 - (0.3 * orange_intensity), 0.0, 1.0)
+		background.modulate = orange_color
+	else:
+		# Estado normal
+		if background.material:
+			background.material = null
+		background.modulate = Color.WHITE
 
 func _on_player1_hit_area_entered(body: Node2D) -> void:
 	if body == ball and ball_active:

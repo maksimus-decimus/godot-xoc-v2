@@ -86,7 +86,7 @@ script = ExtResource("1_f5vmu")
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="Mapa_1" type="TextureRect" parent="."]
 offset_left = -88.0
 offset_top = -176.0
 offset_right = 1352.0

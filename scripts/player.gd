@@ -433,6 +433,10 @@ func take_damage(damage: float, knockback_direction: Vector2) -> void:
 	if invulnerable or is_dead:
 		return
 	
+	# God mode: no recibir daño
+	if Global.god_mode:
+		return
+	
 	hp -= damage
 	player_damaged.emit(player_id, damage)
 	

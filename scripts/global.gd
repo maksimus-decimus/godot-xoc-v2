@@ -29,6 +29,9 @@ var selected_map: int = 0
 var player1_lives: int = MAX_LIVES
 var player2_lives: int = MAX_LIVES
 
+# Debug
+var god_mode: bool = false
+
 # Ganador
 var winner: int = 0
 

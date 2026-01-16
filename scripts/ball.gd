@@ -152,10 +152,10 @@ func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> v
 		var random_strong = strong_sounds[randi() % strong_sounds.size()]
 		audio_player.stream = random_strong
 		audio_player.play()
-		# Llamar screen shake con misma duración que la congelación
+		# Llamar screen shake con duración reducida a la mitad (1.0s)
 		var game_manager = get_parent()
 		if game_manager and game_manager.has_method("screen_shake"):
-			game_manager.screen_shake(2.0, 30.0)
+			game_manager.screen_shake(1.0, 30.0)
 		freeze_player(player)
 		# Mostrar sprite de golpe orientado según dirección
 		show_hit_effect()
@@ -191,12 +191,12 @@ func freeze_player(player: CharacterBody2D) -> void:
 	
 	# Efecto de pulsación en la bola - mantener ball_scale
 	var pulse_tween = create_tween()
-	pulse_tween.set_loops(4)
-	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.3, ball_scale * 1.3), 0.25)
-	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale, ball_scale), 0.25)
+	pulse_tween.set_loops(2)  # Mitad de 4 loops
+	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.3, ball_scale * 1.3), 0.125)  # 0.25 / 2
+	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale, ball_scale), 0.125)
 	
-	# Descongelar después de 2 segundos
-	await get_tree().create_timer(2.0).timeout
+	# Descongelar después de 1.0 segundo (mitad de 2.0)
+	await get_tree().create_timer(1.0).timeout
 	
 	if is_instance_valid(player):
 		player.set_physics_process(true)
