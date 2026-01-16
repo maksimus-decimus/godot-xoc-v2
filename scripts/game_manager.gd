@@ -25,10 +25,17 @@ var ball_active: bool = false
 var players_can_move: bool = false
 var is_paused: bool = false
 var intro_started: bool = false
+var ultimate_in_progress: bool = false
 
 # Audio players para intro battle
 var intro_battle_player: AudioStreamPlayer
 var intro_battle_start_player: AudioStreamPlayer
+
+# Audio player para muerte
+var kill_audio: AudioStreamPlayer
+
+# Audio player para ultimate
+var ultimate_audio: AudioStreamPlayer
 
 func _ready() -> void:
 	# Asegurar que el juego no esté pausado al iniciar
@@ -53,6 +60,14 @@ func _ready() -> void:
 	player2.player_damaged.connect(_on_player_damaged)
 	player1.player_defeated.connect(_on_player_defeated)
 	player2.player_defeated.connect(_on_player_defeated)
+	player1.combo_changed.connect(_on_combo_changed)
+	player2.combo_changed.connect(_on_combo_changed)
+	player1.ultimate_activated.connect(_on_ultimate_activated)
+	player2.ultimate_activated.connect(_on_ultimate_activated)
+	player1.don_ultimate_attack.connect(func(): _on_don_ultimate_attack(1))
+	player2.don_ultimate_attack.connect(func(): _on_don_ultimate_attack(2))
+	player1.ishmael_parry_success.connect(func(): _on_ishmael_parry_success(1))
+	player2.ishmael_parry_success.connect(func(): _on_ishmael_parry_success(2))
 	
 	# Conectar señales de bola
 	ball.ball_hit_player.connect(_on_ball_hit_player)
@@ -105,6 +120,10 @@ func _on_player_damaged(player_id: int, damage: float) -> void:
 	hud.update_hp(player_id, player.hp, player.max_hp)
 
 func _on_player_defeated(player_id: int) -> void:
+	# Reproducir sonido de muerte
+	if kill_audio:
+		kill_audio.play()
+	
 	# Restaurar color del fondo con fade
 	reset_background_effect()
 	
@@ -244,11 +263,15 @@ func _on_player1_hit_area_entered(body: Node2D) -> void:
 	if body == ball and ball_active:
 		player1.hit_connected = true
 		ball.hit_by_player(player1.global_position, player1)
+		# Incrementar combo del jugador 1
+		player1.increment_combo()
 
 func _on_player2_hit_area_entered(body: Node2D) -> void:
 	if body == ball and ball_active:
 		player2.hit_connected = true
 		ball.hit_by_player(player2.global_position, player2)
+		# Incrementar combo del jugador 2
+		player2.increment_combo()
 
 func screen_shake(duration: float = 2.0, intensity: float = 30.0) -> void:
 	if not camera:
@@ -350,6 +373,17 @@ func start_intro_sequence() -> void:
 	# Crear AudioStreamPlayer para intro_battle_start
 	intro_battle_start_player = AudioStreamPlayer.new()
 	add_child(intro_battle_start_player)
+	
+	# Crear AudioStreamPlayer para muerte
+	kill_audio = AudioStreamPlayer.new()
+	kill_audio.stream = load("res://sound/sfx/players/kill.wav")
+	kill_audio.bus = "SFX"
+	add_child(kill_audio)
+	
+	# Crear AudioStreamPlayer para ultimate
+	ultimate_audio = AudioStreamPlayer.new()
+	ultimate_audio.bus = "SFX"
+	add_child(ultimate_audio)
 	
 	# Arrays con los nombres de archivos disponibles
 	var intro_battle_files = [
@@ -533,3 +567,122 @@ func _on_victory_continue() -> void:
 	Global.reset_game()
 	Engine.time_scale = 1.0  # Asegurar que el tiempo vuelva a normal
 	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")
+
+func _on_combo_changed(player_id: int, combo: int) -> void:
+	hud.update_combo(player_id, combo)
+
+func _on_ultimate_activated(player_id: int) -> void:
+	# Esperar si hay otra ultimate en progreso
+	while ultimate_in_progress:
+		await get_tree().create_timer(0.1).timeout
+	
+	# Marcar que una ultimate está en progreso
+	ultimate_in_progress = true
+	
+	# Determinar qué jugador activó la ulti
+	var player = player1 if player_id == 1 else player2
+	var opponent = player2 if player_id == 1 else player1
+	var character = Global.player1_character if player_id == 1 else Global.player2_character
+	
+	# Congelar la bola y el oponente
+	ball.set_physics_process(false)
+	opponent.can_move = false
+	
+	# Elegir audio de ultimate aleatorio
+	var ultimate_sounds = [
+		"res://sound/sfx/players/ultimate (1).wav",
+		"res://sound/sfx/players/ultimate (2).wav",
+		"res://sound/sfx/players/ultimate (3).wav"
+	]
+	ultimate_audio.stream = load(ultimate_sounds[randi() % ultimate_sounds.size()])
+	
+	# Aplicar efecto de blanco y negro al fondo
+	var grayscale_shader = Shader.new()
+	grayscale_shader.code = """
+		shader_type canvas_item;
+		
+		void fragment() {
+			vec4 color = texture(TEXTURE, UV);
+			float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+			COLOR = vec4(vec3(gray), color.a);
+		}
+	"""
+	var shader_material = ShaderMaterial.new()
+	shader_material.shader = grayscale_shader
+	background.material = shader_material
+	
+	# Hacer zoom hacia el jugador
+	var camera_target_pos = player.global_position
+	var original_camera_pos = camera.global_position
+	var original_zoom = camera.zoom
+	var zoom_level = Vector2(2.0, 2.0)
+	
+	# Reproducir sonido
+	ultimate_audio.play()
+	
+	# Animar zoom in
+	var zoom_tween = create_tween()
+	zoom_tween.set_parallel(true)
+	zoom_tween.tween_property(camera, "global_position", camera_target_pos, 0.3)
+	zoom_tween.tween_property(camera, "zoom", zoom_level, 0.3)
+	
+	# Esperar 1 segundo mientras muestra el primer frame de ulti
+	await get_tree().create_timer(1.0).timeout
+	
+	# Animar zoom out
+	var zoom_out_tween = create_tween()
+	zoom_out_tween.set_parallel(true)
+	zoom_out_tween.tween_property(camera, "global_position", original_camera_pos, 0.3)
+	zoom_out_tween.tween_property(camera, "zoom", original_zoom, 0.3)
+	
+	# Restaurar fondo a normal
+	await zoom_out_tween.finished
+	background.material = null
+	
+	# Restaurar movimiento de bola y oponente
+	ball.set_physics_process(true)
+	opponent.can_move = true
+	
+	# Marcar que la ultimate ha terminado
+	ultimate_in_progress = false
+
+func _on_don_ultimate_attack(player_id: int) -> void:
+	# Determinar dirección hacia el oponente
+	var player = player1 if player_id == 1 else player2
+	var opponent = player2 if player_id == 1 else player1
+	
+	# Posicionar bola cerca del jugador
+	ball.global_position = player.global_position + Vector2(50, -50) * player.last_direction
+	
+	# Lanzar pelota hacia el oponente con velocidad máxima
+	var direction_to_opponent = (opponent.global_position - ball.global_position).normalized()
+	ball.direction = direction_to_opponent
+	ball.speed = Global.MAX_BALL_SPEED
+	ball.velocity = ball.direction * ball.speed
+	ball.owner_player_id = player_id
+	ball.is_ultimate_shot = true  # Marcar como disparo ultimate
+	ball.update_tag_color()
+
+func _on_ishmael_parry_success(player_id: int) -> void:
+	# Similar a Don pero con el counter de Ishmael
+	var player = player1 if player_id == 1 else player2
+	var opponent = player2 if player_id == 1 else player1
+	
+	# Cargar y reproducir sonido de parry
+	var parry_sound_path = "res://sound/sfx/players/ishmael/ultra/parry.wav"
+	if ResourceLoader.exists(parry_sound_path):
+		var parry_audio = AudioStreamPlayer.new()
+		parry_audio.stream = load(parry_sound_path)
+		parry_audio.bus = "SFX"
+		add_child(parry_audio)
+		parry_audio.play()
+		parry_audio.finished.connect(func(): parry_audio.queue_free())
+	
+	# Devolver pelota hacia el oponente
+	var direction_to_opponent = (opponent.global_position - ball.global_position).normalized()
+	ball.direction = direction_to_opponent
+	ball.speed = Global.MAX_BALL_SPEED
+	ball.velocity = ball.direction * ball.speed
+	ball.owner_player_id = player_id
+	ball.is_ultimate_shot = true  # Marcar como disparo ultimate
+	ball.update_tag_color()

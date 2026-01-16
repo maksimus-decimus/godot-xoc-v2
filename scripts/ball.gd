@@ -8,6 +8,7 @@ extends CharacterBody2D
 var weak_sounds: Array[AudioStream] = []
 var medium_sounds: Array[AudioStream] = []
 var strong_sounds: Array[AudioStream] = []
+var wall_bounce_sounds: Array[AudioStream] = []
 
 @export var ball_scale: float = 1.0  # Escala de la pelota (ajustable desde Inspector)
 @export var rotation_speed: float = 3.0  # Velocidad de rotación
@@ -16,6 +17,7 @@ var speed: float = Global.INITIAL_BALL_SPEED
 var direction: Vector2 = Vector2.ZERO
 var last_hit_player: CharacterBody2D = null
 var owner_player_id: int = 0  # ID del jugador que tiene el "tag" de la bola (quien la golpeó último)
+var is_ultimate_shot: bool = false  # Si la bola fue lanzada por una ultimate
 
 signal ball_hit_player(player_id: int, damage: float)
 signal ball_speed_changed(new_speed: float)
@@ -33,6 +35,10 @@ func _ready() -> void:
 	strong_sounds.clear()
 	strong_sounds.append(load("res://sound/sfx/golpe/strong_hit.wav"))
 	strong_sounds.append(load("res://sound/sfx/golpe/strong_smash.wav"))
+	
+	wall_bounce_sounds.clear()
+	wall_bounce_sounds.append(load("res://sound/sfx/ball/wall_bounce.wav"))
+	wall_bounce_sounds.append(load("res://sound/sfx/ball/wall_bounce_fast.wav"))
 	
 	# Dirección inicial aleatoria
 	randomize()
@@ -76,10 +82,26 @@ func _physics_process(delta: float) -> void:
 			# Rebotar en paredes
 			velocity = velocity.bounce(collision.get_normal())
 			direction = velocity.normalized()
+			
+			# Reproducir sonido de rebote en pared
+			if wall_bounce_sounds.size() > 0:
+				var sound = wall_bounce_sounds.pick_random()
+				var audio = AudioStreamPlayer.new()
+				audio.stream = sound
+				audio.bus = "SFX"
+				add_child(audio)
+				audio.play()
+				# Eliminar el reproductor después de que termine
+				audio.finished.connect(func(): audio.queue_free())
 
 func calculate_damage() -> float:
 	# DEBUG: One-hit kill mode
 	if Global.debug_one_hit_kill:
+		return 999.0
+	
+	# Si es un disparo de ultimate, hacer 999 de daño
+	if is_ultimate_shot:
+		is_ultimate_shot = false  # Resetear después del primer golpe
 		return 999.0
 	
 	# El daño escala con la velocidad
@@ -100,6 +122,9 @@ func hit_by_player(player_position: Vector2, player: CharacterBody2D) -> void:
 	owner_player_id = player.player_id
 	ball_speed_changed.emit(speed)
 	
+	# Cambiar color según el dueño del tag PRIMERO
+	update_tag_color()
+	
 	# Reproducir sonido según velocidad y aplicar efectos
 	play_hit_sound_by_speed(speed, player)
 	
@@ -107,9 +132,6 @@ func hit_by_player(player_position: Vector2, player: CharacterBody2D) -> void:
 	var tween = create_tween()
 	tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.4, ball_scale * 1.4), 0.1)
 	tween.tween_property(sprite, "scale", Vector2(ball_scale, ball_scale), 0.1)
-	
-	# Cambiar color según el dueño del tag
-	update_tag_color()
 
 func update_tag_color() -> void:
 	# Color según quién tiene el tag (usa modulate para sprites)

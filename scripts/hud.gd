@@ -3,10 +3,12 @@ extends Control
 @onready var p1_hp_bar = $MarginContainer/VBoxContainer/TopBar/P1Section/HPBar
 @onready var p1_hp_label = $MarginContainer/VBoxContainer/TopBar/P1Section/HPLabel
 @onready var p1_lives_label = $MarginContainer/VBoxContainer/TopBar/P1Section/LivesLabel
+@onready var p1_combo_label = $MarginContainer/VBoxContainer/TopBar/P1Section/ComboLabel
 
 @onready var p2_hp_bar = $MarginContainer/VBoxContainer/TopBar/P2Section/HPBar
 @onready var p2_hp_label = $MarginContainer/VBoxContainer/TopBar/P2Section/HPLabel
 @onready var p2_lives_label = $MarginContainer/VBoxContainer/TopBar/P2Section/LivesLabel
+@onready var p2_combo_label = $MarginContainer/VBoxContainer/TopBar/P2Section/ComboLabel
 
 @onready var ball_speed_label = $MarginContainer/VBoxContainer/BallSpeedLabel
 
@@ -46,3 +48,23 @@ func update_lives(player_id: int, lives: int) -> void:
 
 func update_ball_speed(speed: float) -> void:
 	ball_speed_label.text = "Velocidad Bola: %d px/s" % speed
+
+func update_combo(player_id: int, combo: int) -> void:
+	var combo_text = ""
+	if combo >= 4:
+		combo_text = "¡ULTRA LISTA!"
+	else:
+		combo_text = "Combo: %d/4" % combo
+	
+	if player_id == 1:
+		p1_combo_label.text = combo_text
+		if combo >= 4:
+			p1_combo_label.modulate = Color.GOLD
+		else:
+			p1_combo_label.modulate = Color.WHITE
+	else:
+		p2_combo_label.text = combo_text
+		if combo >= 4:
+			p2_combo_label.modulate = Color.GOLD
+		else:
+			p2_combo_label.modulate = Color.WHITE
