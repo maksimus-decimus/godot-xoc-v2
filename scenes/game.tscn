@@ -103,6 +103,8 @@ position = Vector2(200, 520)
 collision_mask = 14
 script = ExtResource("2_b7xqo")
 idle_offset = Vector2(0, -120)
+ultimate_offset = Vector2(0, 50)
+hit_offset = Vector2(0, 50)
 
 [node name="VisualContainer" type="Node2D" parent="Player1"]
 
@@ -147,6 +149,7 @@ script = ExtResource("2_b7xqo")
 player_id = 2
 idle_offset = Vector2(0, -120)
 ultimate_offset = Vector2(0, 50)
+victory_offset = Vector2(0, 50)
 
 [node name="VisualContainer" type="Node2D" parent="Player2"]
 position = Vector2(0, -32)

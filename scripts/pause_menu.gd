@@ -5,6 +5,7 @@ signal quit_pressed
 
 var pausa_audio_player: AudioStreamPlayer
 @onready var god_mode_button = $CenterContainer/VBoxContainer/GodModeButton
+@onready var debug_button = $CenterContainer/VBoxContainer/DebugButton
 
 # Sistema de randomización sin repetición
 var pausa_sounds_pool: Array = []
@@ -69,6 +70,15 @@ func show_pause_menu() -> void:
 			god_mode_button.text = "God Mode: OFF"
 			god_mode_button.modulate = Color.WHITE
 	
+	# Actualizar texto del botón Debug One-Hit Kill
+	if debug_button:
+		if Global.debug_one_hit_kill:
+			debug_button.text = "DEBUG: One-Hit Kill ON"
+			debug_button.modulate = Color.RED
+		else:
+			debug_button.text = "DEBUG: One-Hit Kill OFF"
+			debug_button.modulate = Color.WHITE
+	
 	# Reproducir sonido aleatorio de pausa (sin repetición)
 	var random_pausa = _get_random_sound(pausa_sounds_pool, _reset_pausa_pool)
 	pausa_audio_player.stream = load(random_pausa)
@@ -100,6 +110,13 @@ func _on_god_mode_button_pressed() -> void:
 	UISounds.play_select()
 	Global.god_mode = !Global.god_mode
 	
+	# Si se activa God Mode, desactivar One-Hit Kill
+	if Global.god_mode and Global.debug_one_hit_kill:
+		Global.debug_one_hit_kill = false
+		if debug_button:
+			debug_button.text = "DEBUG: One-Hit Kill OFF"
+			debug_button.modulate = Color.WHITE
+	
 	# Actualizar texto del botón
 	if god_mode_button:
 		if Global.god_mode:
@@ -110,3 +127,25 @@ func _on_god_mode_button_pressed() -> void:
 			god_mode_button.modulate = Color.WHITE
 	
 	print("God Mode: ", "ACTIVADO" if Global.god_mode else "DESACTIVADO")
+
+func _on_debug_button_pressed() -> void:
+	UISounds.play_select()
+	Global.debug_one_hit_kill = !Global.debug_one_hit_kill
+	
+	# Si se activa One-Hit Kill, desactivar God Mode
+	if Global.debug_one_hit_kill and Global.god_mode:
+		Global.god_mode = false
+		if god_mode_button:
+			god_mode_button.text = "God Mode: OFF"
+			god_mode_button.modulate = Color.WHITE
+	
+	# Actualizar texto del botón
+	if debug_button:
+		if Global.debug_one_hit_kill:
+			debug_button.text = "DEBUG: One-Hit Kill ON"
+			debug_button.modulate = Color.RED
+		else:
+			debug_button.text = "DEBUG: One-Hit Kill OFF"
+			debug_button.modulate = Color.WHITE
+	
+	print("Debug One-Hit Kill: ", "ACTIVADO" if Global.debug_one_hit_kill else "DESACTIVADO")

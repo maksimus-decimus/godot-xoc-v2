@@ -11,11 +11,14 @@ extends Node
 
 # Victory overlay (será creado dinámicamente)
 var victory_overlay: CanvasLayer
+var victory_background: ColorRect
 var thats_wrap_label: Label
 var winner_label: Label
 var continue_button: Button
 var finale_audio: AudioStreamPlayer
 var victory_audio: AudioStreamPlayer
+var character_victory_audio: AudioStreamPlayer
+var victory_animation_frames: Array = []
 
 const SPAWN_P1 = Vector2(200, 600)
 const SPAWN_P2 = Vector2(1080, 600)
@@ -297,6 +300,17 @@ func screen_shake(duration: float = 2.0, intensity: float = 30.0) -> void:
 	camera.offset = original_offset
 
 func end_game() -> void:
+	# Flash blanco en toda la pantalla
+	var flash = ColorRect.new()
+	flash.color = Color.WHITE
+	flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(flash)
+	
+	# Fade out del flash
+	var fade_tween = create_tween()
+	fade_tween.tween_property(flash, "modulate:a", 0.0, 0.5)
+	fade_tween.tween_callback(func(): flash.queue_free())
+	
 	# Activar cámara lenta dramática
 	Engine.time_scale = 0.3
 	
@@ -444,11 +458,12 @@ func _create_victory_overlay() -> void:
 	victory_overlay.visible = false
 	add_child(victory_overlay)
 	
-	# Fondo semitransparente
-	var background = ColorRect.new()
-	background.color = Color(0, 0, 0, 0.7)
-	background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	victory_overlay.add_child(background)
+	# Fondo semitransparente (oculto inicialmente)
+	victory_background = ColorRect.new()
+	victory_background.color = Color(0, 0, 0, 0.7)
+	victory_background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	victory_background.visible = false
+	victory_overlay.add_child(victory_background)
 	
 	# Label "That's a wrap" (oculto inicialmente)
 	thats_wrap_label = Label.new()
@@ -491,7 +506,7 @@ func _show_thats_wrap() -> void:
 	wrap_audio.stream = load("res://sound/announcer/finale/2/thats a wrap_finale.wav")
 	wrap_audio.play()
 	
-	# Mostrar overlay y label
+	# Mostrar overlay y label (sin fondo oscuro)
 	victory_overlay.visible = true
 	thats_wrap_label.visible = true
 	
@@ -505,8 +520,40 @@ func _show_thats_wrap() -> void:
 	await get_tree().create_timer(1.0).timeout
 	
 	wrap_audio.queue_free()
+	
+	# Reproducir audio de victoria del personaje
+	var winner_character = Global.player1_character if Global.winner == 1 else Global.player2_character
+	_load_character_victory_sprites(winner_character)
+	
+	character_victory_audio = AudioStreamPlayer.new()
+	add_child(character_victory_audio)
+	
+	if winner_character == 0:  # Don Quixote
+		character_victory_audio.stream = load("res://sound/sfx/players/don_quixote/DON_victory.wav")
+	else:  # Ishmael
+		character_victory_audio.stream = load("res://sound/sfx/players/ishmael/ISHM_victory.wav")
+	
+	character_victory_audio.play()
+	
+	# Usar el sprite del jugador ganador en su posición actual
+	var winner_player = player1 if Global.winner == 1 else player2
+	
+	# Iniciar animación de victoria en loop en el sprite del jugador (no await, corre en paralelo)
+	_animate_character_victory(winner_player)
+	
+	# Esperar a que termine el audio
+	await character_victory_audio.finished
+	
+	# Esperar 0.5 segundos adicionales
+	await get_tree().create_timer(0.5).timeout
+	
+	# Limpiar audio
+	character_victory_audio.queue_free()
 
 func _show_victory_overlay() -> void:
+	# Mostrar fondo oscuro
+	victory_background.visible = true
+	
 	# Reproducir sonido de victoria según el ganador
 	victory_audio = AudioStreamPlayer.new()
 	add_child(victory_audio)
@@ -549,6 +596,38 @@ func _show_victory_overlay() -> void:
 	var random_post = post_victory_files[randi() % post_victory_files.size()]
 	victory_audio.stream = load(random_post)
 	victory_audio.play()
+
+func _load_character_victory_sprites(character: int) -> void:
+	victory_animation_frames.clear()
+	
+	if character == 0:  # Don Quixote
+		# Cargar sprites de victoria de Don Quixote
+		victory_animation_frames.append(load("res://assets/players/don_quixote/Sprites/victory (1).png"))
+		victory_animation_frames.append(load("res://assets/players/don_quixote/Sprites/victory (2).png"))
+		victory_animation_frames.append(load("res://assets/players/don_quixote/Sprites/victory(3).png"))
+	else:  # Ishmael
+		# Cargar sprites de victoria de Ishmael
+		victory_animation_frames.append(load("res://assets/players/ishmael/Sprites/victory (1).png"))
+		victory_animation_frames.append(load("res://assets/players/ishmael/Sprites/victory (2).png"))
+
+func _animate_character_victory(player: Node) -> void:
+	if victory_animation_frames.size() == 0:
+		return
+	
+	if not player or not player.has_node("VisualContainer/Sprite2D"):
+		return
+	
+	var player_sprite = player.get_node("VisualContainer/Sprite2D")
+	
+	# Aplicar offset de victoria
+	player_sprite.offset = player.victory_offset
+	
+	var frame_index = 0
+	# Loop continuo mientras el audio esté sonando
+	while character_victory_audio and character_victory_audio.playing:
+		player_sprite.texture = victory_animation_frames[frame_index]
+		frame_index = (frame_index + 1) % victory_animation_frames.size()
+		await get_tree().create_timer(0.15).timeout
 
 func _on_victory_continue() -> void:
 	UISounds.play_select()

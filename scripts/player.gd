@@ -56,6 +56,7 @@ var swing_sounds: Array[AudioStream] = []
 @export var block_offset: Vector2 = Vector2(0, 0)
 @export var dmg_offset: Vector2 = Vector2(0, 0)
 @export var ultimate_offset: Vector2 = Vector2(0, 0)
+@export var victory_offset: Vector2 = Vector2(0, 0)
 
 # Configuración de hitbox
 @export_group("Hitbox")
@@ -246,6 +247,7 @@ func setup_character() -> void:
 			hit1_3_offset = Vector2(0, 0)
 			block_offset = Vector2(0, 0)
 			dmg_offset = Vector2(0, 0)
+			victory_offset = Vector2(0, 25)
 			# Configurar hitbox de Don Quixote
 			hit_distance = 50.0
 			hit_offset = Vector2(0, 0)
@@ -259,6 +261,7 @@ func setup_character() -> void:
 			hit1_3_offset = Vector2(0, 0)
 			block_offset = Vector2(0, 0)
 			dmg_offset = Vector2(0, 0)
+			victory_offset = Vector2(0, 0)
 			# Configurar hitbox dwde Ishmael
 			hit_distance = 100.0
 			hit_offset = Vector2(0, 0)
