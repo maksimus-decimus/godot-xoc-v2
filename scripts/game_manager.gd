@@ -105,6 +105,9 @@ func _on_player_damaged(player_id: int, damage: float) -> void:
 	hud.update_hp(player_id, player.hp, player.max_hp)
 
 func _on_player_defeated(player_id: int) -> void:
+	# Restaurar color del fondo con fade
+	reset_background_effect()
+	
 	# Perder una vida
 	Global.player_lost_life(player_id)
 	hud.update_lives(player_id, Global.player1_lives if player_id == 1 else Global.player2_lives)
@@ -197,16 +200,45 @@ func update_background_effect(speed: float) -> void:
 		if background.material:
 			background.material = null
 		
+		# Flash al entrar en zona naranja
+		if progress < 0.1:  # Solo en los primeros momentos
+			var flash_tween = create_tween()
+			flash_tween.tween_property(background, "modulate", Color.WHITE * 1.5, 0.05)
+		
 		# Mezcla de blanco a naranja según progreso (más naranja = más velocidad)
-		# Color naranja intenso que se vuelve más fuerte con la velocidad
+		# Naranja que se intensifica: empieza suave y termina muy intenso
 		var orange_intensity = progress
-		var orange_color = Color(1.0, 0.5 - (0.3 * orange_intensity), 0.0, 1.0)
-		background.modulate = orange_color
+		# R siempre en 1.0, G baja de 0.8 a 0.2, B baja de 0.4 a 0.0
+		var green_value = 0.8 - (0.6 * orange_intensity)
+		var blue_value = 0.4 - (0.4 * orange_intensity)
+		var orange_color = Color(1.0, green_value, blue_value, 1.0)
+		
+		var color_tween = create_tween()
+		color_tween.tween_property(background, "modulate", orange_color, 0.1)
 	else:
 		# Estado normal
 		if background.material:
 			background.material = null
 		background.modulate = Color.WHITE
+
+func reset_background_effect() -> void:
+	if not background:
+		return
+	
+	# Fade suave de vuelta al color normal
+	var reset_tween = create_tween()
+	reset_tween.set_parallel(true)
+	
+	# Eliminar shader si existe
+	if background.material:
+		reset_tween.tween_method(func(value): 
+			if background.material:
+				background.material.set_shader_parameter("invert_amount", value)
+		, 1.0, 0.0, 0.5)
+		reset_tween.chain().tween_callback(func(): background.material = null)
+	
+	# Fade del color al blanco
+	reset_tween.tween_property(background, "modulate", Color.WHITE, 0.5)
 
 func _on_player1_hit_area_entered(body: Node2D) -> void:
 	if body == ball and ball_active:
