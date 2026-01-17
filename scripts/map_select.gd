@@ -2,13 +2,16 @@ extends Node
 
 @onready var start_button = $CanvasLayer/CenterContainer/VBoxContainer/StartButton
 @onready var weather_label = $CanvasLayer/WeatherLabel
+@onready var mapa1_sprite = $CanvasLayer/CenterContainer/VBoxContainer/MAPA1
+@onready var mapa2_sprite = $CanvasLayer/CenterContainer/VBoxContainer/MAPA2
+@onready var mapa3_sprite = $CanvasLayer/CenterContainer/VBoxContainer/MAPA3
 
 # Botones de navegación de mapas
 var prev_button: Button
 var next_button: Button
 var map_label: Label
 
-const MAP_NAMES = ["ARENA CLÁSICA", "MAPA 2", "MAPA 3"]
+const MAP_NAMES = ["MAPA 1", "MAPA 2", "MAPA 3"]
 
 func _ready() -> void:
 	MusicManager.play_music(MusicManager.CHAR_SELECT_MUSIC)
@@ -36,6 +39,26 @@ func _ready() -> void:
 func update_map_display() -> void:
 	if map_label:
 		map_label.text = MAP_NAMES[Global.selected_map]
+	
+	# Ocultar todos los mapas primero
+	if mapa1_sprite:
+		mapa1_sprite.visible = false
+	if mapa2_sprite:
+		mapa2_sprite.visible = false
+	if mapa3_sprite:
+		mapa3_sprite.visible = false
+	
+	# Mostrar solo el mapa seleccionado
+	match Global.selected_map:
+		0:
+			if mapa1_sprite:
+				mapa1_sprite.visible = true
+		1:
+			if mapa2_sprite:
+				mapa2_sprite.visible = true
+		2:
+			if mapa3_sprite:
+				mapa3_sprite.visible = true
 
 func update_weather_display() -> void:
 	var weather_text = "Clima: " + WeatherAPI.current_weather_type
