@@ -1,5 +1,7 @@
 extends Node
 
+const CONFIG_FILE = "user://settings.cfg"
+
 # Configuración del juego
 const MAX_HP = 100
 const MAX_LIVES = 3
@@ -32,6 +34,9 @@ var player2_lives: int = MAX_LIVES
 # Debug
 var god_mode: bool = false
 
+# Opciones
+var skip_intro: bool = false
+
 # Ganador
 var winner: int = 0
 
@@ -40,6 +45,27 @@ var game_should_start: bool = true
 
 # DEBUG: One-hit kill mode
 var debug_one_hit_kill: bool = false
+
+func _ready() -> void:
+	load_settings()
+
+func load_settings() -> void:
+	var config = ConfigFile.new()
+	var err = config.load(CONFIG_FILE)
+	
+	if err == OK:
+		skip_intro = config.get_value("gameplay", "skip_intro", false)
+		
+		# Aplicar volumen guardado
+		var volume = config.get_value("audio", "volume", 100.0)
+		apply_volume(volume)
+
+func apply_volume(volume: float) -> void:
+	var db = linear_to_db(volume / 100.0)
+	if volume <= 0:
+		db = -80
+	# Bus 0 es Master
+	AudioServer.set_bus_volume_db(0, db)
 
 # Reiniciar el juego
 func reset_game() -> void:

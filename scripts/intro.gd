@@ -3,6 +3,11 @@ extends Node
 @onready var video_player = $CanvasLayer/VideoStreamPlayer
 
 func _ready() -> void:
+	# Si está activado saltar intro, ir directo al menú
+	if Global.skip_intro:
+		SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")
+		return
+	
 	# Conectar señal de fin de video
 	video_player.finished.connect(_on_video_finished)
 	video_player.play()

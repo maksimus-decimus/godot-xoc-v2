@@ -3,15 +3,18 @@ extends Node
 @onready var play_choice = $CanvasLayer/PlayChoice
 @onready var quit_choice = $CanvasLayer/QuitChoice
 @onready var profile_choice = $CanvasLayer/ProfileChoice
+@onready var options_choice = $CanvasLayer/OptionsChoice
 @onready var play_button = $CanvasLayer/PlayChoice/PlayButton
 @onready var quit_button = $CanvasLayer/QuitChoice/QuitButton
 @onready var profile_button = $CanvasLayer/ProfileChoice/ProfileButton
+@onready var options_button = $CanvasLayer/OptionsChoice/OptionsButton
 @onready var profile_name_label = $CanvasLayer/ProfileNameLabel
 
 # Posiciones base y desplazamientos
 var play_base_x: float = 120.0
 var quit_base_x: float = 120.0
 var profile_base_x: float = 120.0
+var options_base_x: float = 120.0
 var offset_selected: float = 30.0  # Desplazamiento a la derecha cuando está seleccionado
 var offset_unselected: float = -15.0  # Desplazamiento a la izquierda cuando NO está seleccionado
 
@@ -27,8 +30,8 @@ func _ready() -> void:
 	WeatherAPI.fetch_weather()
 	
 	# Inicializar arrays
-	all_buttons = [play_button, quit_button, profile_button]
-	all_choices = [play_choice, quit_choice, profile_choice]
+	all_buttons = [play_button, quit_button, profile_button, options_button]
+	all_choices = [play_choice, quit_choice, profile_choice, options_choice]
 	
 	# Conectar señales de focus y hover
 	if play_button:
@@ -51,6 +54,12 @@ func _ready() -> void:
 		# Inicializar posición no seleccionada
 		profile_choice.position.x = profile_base_x + offset_unselected
 	
+	if options_button:
+		options_button.focus_entered.connect(_on_options_focus_entered)
+		options_button.mouse_entered.connect(_on_options_mouse_entered)
+		# Inicializar posición no seleccionada
+		options_choice.position.x = options_base_x + offset_unselected
+	
 	# Actualizar nombre del perfil
 	update_profile_display()
 	
@@ -67,14 +76,20 @@ func _input(event: InputEvent) -> void:
 		if current_focused_button == profile_button:
 			UISounds.play_slide()
 			play_button.grab_focus()
-		elif current_focused_button == quit_button:
+		elif current_focused_button == options_button:
 			UISounds.play_slide()
 			profile_button.grab_focus()
+		elif current_focused_button == quit_button:
+			UISounds.play_slide()
+			options_button.grab_focus()
 	elif event.is_action_pressed("p1_down") or event.is_action_pressed("p2_down"):
 		if current_focused_button == play_button:
 			UISounds.play_slide()
 			profile_button.grab_focus()
 		elif current_focused_button == profile_button:
+			UISounds.play_slide()
+			options_button.grab_focus()
+		elif current_focused_button == options_button:
 			UISounds.play_slide()
 			quit_button.grab_focus()
 
@@ -102,6 +117,14 @@ func _on_profile_mouse_entered() -> void:
 	UISounds.play_slide()
 	profile_button.grab_focus()
 
+func _on_options_focus_entered() -> void:
+	animate_selection_multi(options_choice)
+	current_focused_button = options_button
+
+func _on_options_mouse_entered() -> void:
+	UISounds.play_slide()
+	options_button.grab_focus()
+
 func animate_selection_multi(selected_choice: Sprite2D) -> void:
 	# Animar todos los botones
 	for i in range(all_choices.size()):
@@ -111,7 +134,15 @@ func animate_selection_multi(selected_choice: Sprite2D) -> void:
 		tween.set_trans(Tween.TRANS_CUBIC)
 		
 		# Obtener posición base según el índice
-		var base_x = play_base_x if choice == play_choice else (quit_base_x if choice == quit_choice else profile_base_x)
+		var base_x = play_base_x
+		if choice == play_choice:
+			base_x = play_base_x
+		elif choice == quit_choice:
+			base_x = quit_base_x
+		elif choice == profile_choice:
+			base_x = profile_base_x
+		elif choice == options_choice:
+			base_x = options_base_x
 		
 		if choice == selected_choice:
 			# Mover a la derecha (seleccionado)
@@ -148,7 +179,9 @@ func update_profile_display() -> void:
 func _on_play_button_pressed() -> void:
 	UISounds.play_select()
 	SceneTransition.loading_screen_to_scene("res://scenes/character_select_new.tscn")
-
+func _on_options_button_pressed() -> void:
+	UISounds.play_select()
+	SceneTransition.fade_to_scene("res://scenes/options_menu.tscn")
 func _on_quit_button_pressed() -> void:
 	get_tree().quit()
 
