@@ -1,19 +1,19 @@
-[gd_scene load_steps=12 format=3 uid="uid://c44davyaahls4"]
+[gd_scene load_steps=12 format=3 uid="uid://bgy4q5v0pwcft"]
 
-[ext_resource type="Script" uid="uid://bgdrujfs8u5yg" path="res://scripts/character_select.gd" id="1_ybkhq"]
-[ext_resource type="Texture2D" uid="uid://bmwcrmd7byxcg" path="res://assets/char_select_v2/p1_p2_fondo.png" id="2_smab6"]
-[ext_resource type="Texture2D" uid="uid://cxxye758glbbt" path="res://assets/char_select_v2/don_big.png" id="3_ntyx6"]
-[ext_resource type="Texture2D" uid="uid://begcrly2cv2ko" path="res://assets/char_select_v2/ishm_big.png" id="4_w3o2d"]
-[ext_resource type="Texture2D" uid="uid://dj8sy11od17x2" path="res://assets/char_select_v2/char_base.png" id="5_ogk4p"]
-[ext_resource type="Texture2D" uid="uid://pi1nkhau56x5" path="res://assets/char_select_v2/don_smll.png" id="6_p4fww"]
-[ext_resource type="Texture2D" uid="uid://b40sjld14m5wk" path="res://assets/char_select_v2/grid.png" id="7_ntyx6"]
-[ext_resource type="Texture2D" uid="uid://fbyjg83gtsow" path="res://assets/char_select_v2/ishm_smll.png" id="7_q287e"]
-[ext_resource type="Texture2D" uid="uid://c6mmi8a5vpka0" path="res://assets/char_select_v2/P1 SELECT.png" id="9_ogk4p"]
-[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="9_w3o2d"]
-[ext_resource type="Texture2D" uid="uid://dphgv2mkr4apx" path="res://assets/char_select_v2/P2 SELECT.png" id="10_p4fww"]
+[ext_resource type="Script" uid="uid://bgdrujfs8u5yg" path="res://scripts/character_select.gd" id="1_ogk4p"]
+[ext_resource type="Texture2D" uid="uid://bmwcrmd7byxcg" path="res://assets/char_select_v2/p1_p2_fondo.png" id="2_p4fww"]
+[ext_resource type="Texture2D" uid="uid://cxxye758glbbt" path="res://assets/char_select_v2/don_big.png" id="3_q287e"]
+[ext_resource type="Texture2D" uid="uid://begcrly2cv2ko" path="res://assets/char_select_v2/ishm_big.png" id="4_p3m03"]
+[ext_resource type="Texture2D" uid="uid://fbyjg83gtsow" path="res://assets/char_select_v2/ishm_smll.png" id="5_63pgb"]
+[ext_resource type="Texture2D" uid="uid://pi1nkhau56x5" path="res://assets/char_select_v2/don_smll.png" id="6_y36g6"]
+[ext_resource type="Texture2D" uid="uid://b40sjld14m5wk" path="res://assets/char_select_v2/grid.png" id="7_0q7gx"]
+[ext_resource type="Texture2D" uid="uid://dj8sy11od17x2" path="res://assets/char_select_v2/char_base.png" id="8_6l68l"]
+[ext_resource type="Texture2D" uid="uid://c6mmi8a5vpka0" path="res://assets/char_select_v2/P1 SELECT.png" id="9_4c2aj"]
+[ext_resource type="Texture2D" uid="uid://dphgv2mkr4apx" path="res://assets/char_select_v2/P2 SELECT.png" id="10_p81xu"]
+[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="11_bpof2"]
 
 [node name="CharacterSelect" type="Node2D"]
-script = ExtResource("1_ybkhq")
+script = ExtResource("1_ogk4p")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
@@ -21,7 +21,7 @@ position = Vector2(640, 360)
 [node name="P1P2Fondo" type="TextureRect" parent="."]
 offset_right = 1280.0
 offset_bottom = 720.0
-texture = ExtResource("2_smab6")
+texture = ExtResource("2_p4fww")
 expand_mode = 1
 
 [node name="CharacterBigL" type="Node2D" parent="."]
@@ -31,7 +31,7 @@ offset_left = 32.0
 offset_top = -80.0
 offset_right = 841.6
 offset_bottom = 712.0
-texture = ExtResource("3_ntyx6")
+texture = ExtResource("3_q287e")
 expand_mode = 1
 stretch_mode = 5
 
@@ -39,7 +39,7 @@ stretch_mode = 5
 offset_top = -128.0
 offset_right = 832.0
 offset_bottom = 704.0
-texture = ExtResource("4_w3o2d")
+texture = ExtResource("4_p3m03")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
@@ -51,7 +51,7 @@ offset_left = 480.0
 offset_top = -40.0
 offset_right = 1289.6
 offset_bottom = 752.0
-texture = ExtResource("3_ntyx6")
+texture = ExtResource("3_q287e")
 expand_mode = 1
 stretch_mode = 5
 flip_h = true
@@ -61,7 +61,7 @@ offset_left = 448.0
 offset_top = -80.0
 offset_right = 1280.0
 offset_bottom = 752.0
-texture = ExtResource("4_w3o2d")
+texture = ExtResource("4_p3m03")
 expand_mode = 1
 stretch_mode = 5
 
@@ -74,7 +74,7 @@ offset_right = 1280.3607
 offset_bottom = 839.26917
 rotation = 0.06884071
 scale = Vector2(1.040001, 1.040001)
-texture = ExtResource("7_q287e")
+texture = ExtResource("5_63pgb")
 expand_mode = 1
 
 [node name="DonIco" type="TextureRect" parent="CharacterIcons"]
@@ -84,7 +84,7 @@ offset_right = 587.3276
 offset_bottom = 343.85498
 rotation = 0.021253025
 scale = Vector2(2.2163825, 2.2163825)
-texture = ExtResource("6_p4fww")
+texture = ExtResource("6_y36g6")
 expand_mode = 1
 
 [node name="DonButton" type="Button" parent="CharacterIcons"]
@@ -106,36 +106,130 @@ flat = true
 [node name="Grid" type="TextureRect" parent="."]
 offset_right = 1280.0
 offset_bottom = 720.0
-texture = ExtResource("7_ntyx6")
+texture = ExtResource("7_0q7gx")
 expand_mode = 1
 
 [node name="CharBase" type="TextureRect" parent="."]
 offset_right = 1280.0
 offset_bottom = 720.0
-texture = ExtResource("5_ogk4p")
+texture = ExtResource("8_6l68l")
 expand_mode = 1
 
 [node name="Selectors" type="Node2D" parent="."]
 
 [node name="P1Selector" type="TextureRect" parent="Selectors"]
-visible = false
-offset_left = 395.0
-offset_top = 305.0
-offset_right = 605.0
-offset_bottom = 515.0
-texture = ExtResource("9_ogk4p")
+offset_left = 1.0
+offset_top = -2.0
+offset_right = 1281.0
+offset_bottom = 723.0
+texture = ExtResource("9_4c2aj")
 expand_mode = 1
-stretch_mode = 5
 
 [node name="P2Selector" type="TextureRect" parent="Selectors"]
-visible = false
-offset_left = 675.0
-offset_top = 305.0
-offset_right = 885.0
-offset_bottom = 515.0
-texture = ExtResource("10_p4fww")
+offset_left = 2.0
+offset_right = 1280.0
+offset_bottom = 718.0
+texture = ExtResource("10_p81xu")
 expand_mode = 1
-stretch_mode = 5
+
+[node name="NOM_R" type="Label" parent="."]
+offset_left = -246.498
+offset_top = 2943.1006
+offset_right = -246.498
+offset_bottom = 2943.1006
+rotation = 0.2928967
+scale = Vector2(1.534556, 1.534556)
+
+[node name="Nom_ISHMAEL2" type="Label" parent="NOM_R"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 241.50975
+offset_top = -2033.8385
+offset_right = 471.69943
+offset_bottom = -1985.1246
+grow_horizontal = 2
+grow_vertical = 0
+rotation = -0.14554527
+scale = Vector2(0.93265593, 0.93265593)
+theme_override_fonts/font = ExtResource("11_bpof2")
+theme_override_font_sizes/font_size = 24
+text = "ISHMAEL"
+horizontal_alignment = 1
+
+[node name="Nombre_DONL" type="Label" parent="NOM_R"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 228.04121
+offset_top = -2024.3318
+offset_right = 540.2391
+offset_bottom = -1980.1392
+grow_horizontal = 2
+grow_vertical = 0
+rotation = -0.15733366
+scale = Vector2(0.8155902, 0.77855045)
+theme_override_fonts/font = ExtResource("11_bpof2")
+theme_override_font_sizes/font_size = 24
+text = "DON QUIXOTE"
+horizontal_alignment = 1
+
+[node name="NOM_L" type="Label" parent="."]
+offset_left = -3.3225555
+offset_top = 1322.7075
+offset_right = -3.3225555
+offset_bottom = 1322.7075
+rotation = 0.14644834
+scale = Vector2(1.238772, 1.238772)
+
+[node name="Nom_ISHMAEL" type="Label" parent="NOM_L"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -126.96801
+offset_top = -633.2318
+offset_right = 103.22169
+offset_bottom = -584.51794
+grow_horizontal = 2
+grow_vertical = 0
+rotation = 0.02550323
+scale = Vector2(1.1888047, 1.1204847)
+theme_override_fonts/font = ExtResource("11_bpof2")
+theme_override_font_sizes/font_size = 24
+text = "ISHMAEL"
+horizontal_alignment = 1
+
+[node name="Nombre_DON" type="Label" parent="NOM_L"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -74.91459
+offset_top = -634.38196
+offset_right = 100.08541
+offset_bottom = -595.27124
+grow_horizontal = 2
+grow_vertical = 0
+rotation = 0.012712188
+scale = Vector2(1.0785366, 1.0785366)
+theme_override_fonts/font = ExtResource("11_bpof2")
+theme_override_font_sizes/font_size = 24
+text = "DON QUIXOTE"
+horizontal_alignment = 1
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
@@ -151,7 +245,7 @@ offset_right = 288.0
 offset_bottom = -11.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_fonts/font = ExtResource("9_w3o2d")
+theme_override_fonts/font = ExtResource("11_bpof2")
 theme_override_font_sizes/font_size = 24
 text = "P1: A/D + ESPACIO | P2: ←/→ + ENTER"
 horizontal_alignment = 1
@@ -168,8 +262,15 @@ offset_right = 275.0
 offset_bottom = -633.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_fonts/font = ExtResource("9_w3o2d")
+theme_override_fonts/font = ExtResource("11_bpof2")
 theme_override_font_sizes/font_size = 32
 text = "CONTINUAR"
 
+[node name="BackButton" type="Button" parent="CanvasLayer"]
+offset_top = 96.0
+offset_right = 100.0
+offset_bottom = 156.0
+flat = true
+
 [connection signal="pressed" from="CanvasLayer/ContinueButton" to="." method="_on_continue_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/BackButton" to="." method="_on_back_button_pressed"]

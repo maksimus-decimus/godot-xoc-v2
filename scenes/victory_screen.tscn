@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://dpu5cnkudc0lq"]
+[gd_scene load_steps=3 format=3 uid="uid://dpu5cnkudc0lq"]
 
-[ext_resource type="Script" path="res://scripts/victory_screen.gd" id="1_1hy6p"]
+[ext_resource type="Script" uid="uid://fcb2oypt8l5n" path="res://scripts/victory_screen.gd" id="1_1hy6p"]
+[ext_resource type="Texture2D" uid="uid://dssexkxo2pixv" path="res://assets/hud/button.png" id="2_wdgif"]
 
 [node name="VictoryScreen" type="Node"]
 script = ExtResource("1_1hy6p")
@@ -16,6 +17,11 @@ grow_vertical = 2
 color = Color(0.1, 0.05, 0.15, 1)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Button" type="Sprite2D" parent="CanvasLayer"]
+position = Vector2(648, 431.99997)
+scale = Vector2(1.425, 1.2179487)
+texture = ExtResource("2_wdgif")
 
 [node name="CenterContainer" type="CenterContainer" parent="CanvasLayer"]
 anchors_preset = 15

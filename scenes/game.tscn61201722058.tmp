@@ -1,0 +1,251 @@
+[gd_scene load_steps=24 format=3 uid="uid://c3kq45y0o6jlw"]
+
+[ext_resource type="Script" uid="uid://uto7ou36b7yl" path="res://scripts/game_manager.gd" id="1_f5vmu"]
+[ext_resource type="Script" uid="uid://bsgf5nbf6qoyv" path="res://scripts/player.gd" id="2_b7xqo"]
+[ext_resource type="Texture2D" uid="uid://dbfnxwe7gfrad" path="res://assets/background/stage_1_new.png" id="2_ir15t"]
+[ext_resource type="Texture2D" uid="uid://dp1h7pp7bfnuf" path="res://assets/players/don_quixote/Sprites/idle.png" id="2_preview"]
+[ext_resource type="Texture2D" uid="uid://dp5n4adnshfst" path="res://assets/msc/bola1.png" id="3_ball"]
+[ext_resource type="Script" uid="uid://doy5hsbkhii0i" path="res://scripts/ball.gd" id="3_dkw5c"]
+[ext_resource type="Texture2D" uid="uid://dxd7au3jp7uq2" path="res://assets/msc/bola_golpe.png" id="4_hit"]
+[ext_resource type="PackedScene" uid="uid://cy1i6pbfawc4k" path="res://scenes/ui/hud.tscn" id="4_pj8yw"]
+[ext_resource type="PackedScene" uid="uid://cxn5y3h8xt7c0" path="res://scenes/pause_menu.tscn" id="5_pause"]
+[ext_resource type="Texture2D" uid="uid://ftpljyapvfn5" path="res://assets/hud/thatsawrap.png" id="9_kvuet"]
+[ext_resource type="Texture2D" uid="uid://c1b0ssu1n4a0l" path="res://assets/msc/Showtime.png" id="12_dinhu"]
+[ext_resource type="Texture2D" uid="uid://u3clgtx4agwj" path="res://assets/msc/showtime_plain01.png" id="12_ir15t"]
+[ext_resource type="Texture2D" uid="uid://c782h8y06xkgh" path="res://assets/msc/showtime_glow01.png" id="13_ca42v"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_player"]
+size = Vector2(56, 121)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hit"]
+size = Vector2(137.03708, 144.5)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
+radius = 16.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(1280, 40)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kvuet"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(0, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_trtic"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(1210, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ir15t"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(2420, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ca42v"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(3630, 0, 1210, 327)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rysoc"]
+atlas = ExtResource("12_dinhu")
+region = Rect2(4840, 0, 1210, 327)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ssvqc"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("12_ir15t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ir15t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_ir15t")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_ca42v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kvuet")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_trtic")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ir15t")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ca42v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rysoc")
+}],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}]
+
+[node name="Game" type="Node2D"]
+script = ExtResource("1_f5vmu")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+limit_left = 0
+limit_top = 0
+limit_right = 1280
+limit_bottom = 720
+
+[node name="Mapa_1" type="TextureRect" parent="."]
+offset_left = -88.0
+offset_top = -176.0
+offset_right = 1352.0
+offset_bottom = 717.0
+texture = ExtResource("2_ir15t")
+expand_mode = 1
+
+[node name="Player1" type="CharacterBody2D" parent="." groups=["players"]]
+position = Vector2(200, 520)
+collision_mask = 14
+script = ExtResource("2_b7xqo")
+idle_offset = Vector2(0, -120)
+ultimate_offset = Vector2(0, 50)
+hit_offset = Vector2(0, 50)
+
+[node name="VisualContainer" type="Node2D" parent="Player1"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Player1/VisualContainer"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_preview")
+
+[node name="ColorRect" type="ColorRect" parent="Player1/VisualContainer"]
+offset_left = -40.0
+offset_top = -15.0
+offset_right = 24.0
+offset_bottom = 89.0
+color = Color(1, 0, 0, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player1"]
+position = Vector2(-8, 33)
+shape = SubResource("RectangleShape2D_player")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player1"]
+
+[node name="HitArea" type="Area2D" parent="Player1"]
+collision_layer = 8
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player1/HitArea"]
+position = Vector2(26.399994, 9.5)
+scale = Vector2(1.08, 1)
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="HitIndicator" type="ColorRect" parent="Player1/HitArea"]
+modulate = Color(1, 1, 0, 0)
+offset_left = -32.0
+offset_top = -55.0
+offset_right = 88.0
+offset_bottom = 74.0
+
+[node name="Player2" type="CharacterBody2D" parent="." groups=["players"]]
+position = Vector2(1080, 360)
+collision_mask = 14
+script = ExtResource("2_b7xqo")
+player_id = 2
+idle_offset = Vector2(0, -120)
+ultimate_offset = Vector2(0, 50)
+victory_offset = Vector2(0, 50)
+
+[node name="VisualContainer" type="Node2D" parent="Player2"]
+position = Vector2(0, -32)
+
+[node name="Sprite2D" type="Sprite2D" parent="Player2/VisualContainer"]
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("2_preview")
+
+[node name="ColorRect" type="ColorRect" parent="Player2/VisualContainer"]
+offset_left = -16.0
+offset_top = -56.0
+offset_right = 40.0
+offset_bottom = 64.0
+color = Color(0, 0.5, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player2"]
+position = Vector2(12, 0)
+shape = SubResource("RectangleShape2D_player")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="Player2"]
+
+[node name="HitArea" type="Area2D" parent="Player2"]
+collision_layer = 8
+collision_mask = 2
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player2/HitArea"]
+position = Vector2(-27.481445, -7.75)
+shape = SubResource("RectangleShape2D_hit")
+
+[node name="HitIndicator" type="ColorRect" parent="Player2/HitArea"]
+visible = false
+modulate = Color(1, 1, 0, 0)
+offset_left = -96.0
+offset_top = -80.0
+offset_right = 8.0
+offset_bottom = 64.0
+
+[node name="Ball" type="CharacterBody2D" parent="."]
+position = Vector2(654, 503)
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("3_dkw5c")
+ball_scale = 4.5
+
+[node name="Sprite2D" type="Sprite2D" parent="Ball"]
+scale = Vector2(2.56, 2.56)
+texture = ExtResource("3_ball")
+
+[node name="HitSprite" type="Sprite2D" parent="Ball"]
+visible = false
+texture = ExtResource("4_hit")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ball"]
+shape = SubResource("CircleShape2D_ball")
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="TopWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(640, -20)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Floor" type="CollisionShape2D" parent="Walls"]
+position = Vector2(640, 692)
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="LeftWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-20, 360)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="RightWall" type="CollisionShape2D" parent="Walls"]
+position = Vector2(1300, 360)
+rotation = 1.5708
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="CanvasLayer" instance=ExtResource("4_pj8yw")]
+offset_right = -17.0
+
+[node name="Thatsawrap" type="Sprite2D" parent="CanvasLayer"]
+visible = false
+position = Vector2(666, 297)
+scale = Vector2(0.769249, 0.80924904)
+texture = ExtResource("9_kvuet")
+
+[node name="ShowTime" type="AnimatedSprite2D" parent="."]
+position = Vector2(640, 279)
+scale = Vector2(0.5, 0.5)
+sprite_frames = SubResource("SpriteFrames_ssvqc")
+frame_progress = 0.54861957
+speed_scale = 1.5
+
+[node name="PauseMenu" parent="." instance=ExtResource("5_pause")]
+visible = false

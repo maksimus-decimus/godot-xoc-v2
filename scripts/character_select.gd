@@ -68,6 +68,14 @@ var p2_character_index: int = 0  # Empieza en Don
 var p1_confirmed: bool = false
 var p2_confirmed: bool = false
 
+# Tweens activos para animaciones
+var p1_tween: Tween = null
+var p2_tween: Tween = null
+
+# Posiciones base de los contenedores (guardadas al inicio)
+var character_big_l_base_position: Vector2
+var character_big_r_base_position: Vector2
+
 # Posiciones exactas de los selectores (ajusta estos valores según tus íconos)
 var selector_positions = [
 	Vector2(0,0),  # Don - posición del selector sobre Don
@@ -76,6 +84,12 @@ var selector_positions = [
 
 func _ready() -> void:
 	MusicManager.play_music(MusicManager.CHAR_SELECT_MUSIC)
+	
+	# Guardar posiciones base de los contenedores BIG
+	if character_big_l:
+		character_big_l_base_position = character_big_l.position
+	if character_big_r:
+		character_big_r_base_position = character_big_r.position
 	
 	# Crear audio players para sonidos de confirmación y voces
 	char_select_audio = AudioStreamPlayer.new()
@@ -308,29 +322,67 @@ func update_big_character_left(character_index: int) -> void:
 	if not character_big_l:
 		return
 	
+	# Detener animación anterior si existe
+	if p1_tween:
+		p1_tween.kill()
+	
 	# Ocultar todos los hijos primero
 	for child in character_big_l.get_children():
 		child.visible = false
 	
-	# Mostrar solo el personaje seleccionado
+	# Obtener el nodo del personaje a mostrar
+	var character_node: Node = null
 	if character_index == 0 and character_big_l.has_node("DonBig"):
-		character_big_l.get_node("DonBig").visible = true
+		character_node = character_big_l.get_node("DonBig")
 	elif character_index == 1 and character_big_l.has_node("IshBig"):
-		character_big_l.get_node("IshBig").visible = true
+		character_node = character_big_l.get_node("IshBig")
+	
+	if not character_node:
+		return
+	
+	# Iniciar desde la izquierda (fuera de pantalla) con alpha 0
+	character_big_l.position = character_big_l_base_position + Vector2(-300, 0)
+	character_big_l.modulate.a = 0.0
+	character_node.visible = true
+	
+	# Animar posición y fade
+	p1_tween = create_tween()
+	p1_tween.set_parallel(true)
+	p1_tween.tween_property(character_big_l, "position", character_big_l_base_position, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	p1_tween.tween_property(character_big_l, "modulate:a", 1.0, 0.5)
 
 func update_big_character_right(character_index: int) -> void:
 	if not character_big_r:
 		return
 	
+	# Detener animación anterior si existe
+	if p2_tween:
+		p2_tween.kill()
+	
 	# Ocultar todos los hijos primero
 	for child in character_big_r.get_children():
 		child.visible = false
 	
-	# Mostrar solo el personaje seleccionado
+	# Obtener el nodo del personaje a mostrar
+	var character_node: Node = null
 	if character_index == 0 and character_big_r.has_node("DonBig"):
-		character_big_r.get_node("DonBig").visible = true
+		character_node = character_big_r.get_node("DonBig")
 	elif character_index == 1 and character_big_r.has_node("IshBig"):
-		character_big_r.get_node("IshBig").visible = true
+		character_node = character_big_r.get_node("IshBig")
+	
+	if not character_node:
+		return
+	
+	# Iniciar desde la derecha (fuera de pantalla) con alpha 0
+	character_big_r.position = character_big_r_base_position + Vector2(300, 0)
+	character_big_r.modulate.a = 0.0
+	character_node.visible = true
+	
+	# Animar posición y fade
+	p2_tween = create_tween()
+	p2_tween.set_parallel(true)
+	p2_tween.tween_property(character_big_r, "position", character_big_r_base_position, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	p2_tween.tween_property(character_big_r, "modulate:a", 1.0, 0.5)
 
 func _on_continue_button_pressed() -> void:
 	if not (p1_confirmed and p2_confirmed):

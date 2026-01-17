@@ -96,3 +96,38 @@ func setup_portraits() -> void:
 		don_port_r.visible = true
 	else:  # Ishmael
 		ishm_port_r.visible = true
+
+func shake_portrait(player_id: int) -> void:
+	var portrait: Sprite2D
+	
+	# Determinar cuál portrait vibrar según el jugador y su personaje
+	if player_id == 1:
+		if Global.player1_character == 0:
+			portrait = don_port_l
+		else:
+			portrait = ishm_port_l
+	else:
+		if Global.player2_character == 0:
+			portrait = don_port_r
+		else:
+			portrait = ishm_port_r
+	
+	if not portrait:
+		return
+	
+	var original_position = portrait.position
+	var shake_amount = 8.0
+	var shake_duration = 0.3
+	var shake_time = 0.0
+	
+	# Vibrar durante un tiempo corto
+	while shake_time < shake_duration:
+		portrait.position = original_position + Vector2(
+			randf_range(-shake_amount, shake_amount),
+			randf_range(-shake_amount, shake_amount)
+		)
+		await get_tree().create_timer(0.05).timeout
+		shake_time += 0.05
+	
+	# Restaurar posición original
+	portrait.position = original_position

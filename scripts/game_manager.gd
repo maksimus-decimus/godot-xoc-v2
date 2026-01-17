@@ -40,6 +40,9 @@ var kill_audio: AudioStreamPlayer
 # Audio player para ultimate
 var ultimate_audio: AudioStreamPlayer
 
+# Sistema de lluvia
+var rain_particles: GPUParticles2D
+
 func _ready() -> void:
 	# Asegurar que el juego no esté pausado al iniciar
 	get_tree().paused = false
@@ -55,6 +58,13 @@ func _ready() -> void:
 	# Ocultar ShowTime al inicio
 	if showtime_sprite:
 		showtime_sprite.visible = false
+	
+	# Crear sistema de lluvia
+	_create_rain_system()
+	
+	# Consultar clima y activar lluvia si es necesario
+	WeatherAPI.weather_data_received.connect(_on_weather_received)
+	WeatherAPI.fetch_weather()
 	
 	setup_game()
 	
@@ -121,6 +131,7 @@ func setup_game() -> void:
 func _on_player_damaged(player_id: int, damage: float) -> void:
 	var player = player1 if player_id == 1 else player2
 	hud.update_hp(player_id, player.hp, player.max_hp)
+	hud.shake_portrait(player_id)
 
 func _on_player_defeated(player_id: int) -> void:
 	# Reproducir sonido de muerte
@@ -490,6 +501,59 @@ func start_intro_sequence() -> void:
 	# Limpiar los reproductores de audio
 	intro_battle_player.queue_free()
 	intro_battle_start_player.queue_free()
+
+func _create_rain_system() -> void:
+	# Crear partículas de lluvia
+	rain_particles = GPUParticles2D.new()
+	rain_particles.amount = 500
+	rain_particles.lifetime = 2.0
+	rain_particles.explosiveness = 0.0
+	rain_particles.randomness = 0.0
+	rain_particles.visibility_rect = Rect2(-1000, -100, 3000, 1000)
+	rain_particles.local_coords = false
+	rain_particles.emitting = false
+	
+	# Configurar material de proceso
+	var process_material = ParticleProcessMaterial.new()
+	process_material.emission_shape = ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	process_material.emission_box_extents = Vector3(1500, 10, 0)
+	process_material.direction = Vector3(0, 1, 0)
+	process_material.gravity = Vector3(0, 800, 0)
+	process_material.initial_velocity_min = 300.0
+	process_material.initial_velocity_max = 400.0
+	process_material.scale_min = 0.5
+	process_material.scale_max = 1.0
+	rain_particles.process_material = process_material
+	
+	# Crear textura simple de gota (línea blanca)
+	var gradient = Gradient.new()
+	gradient.add_point(0.0, Color(0.7, 0.7, 1.0, 0.8))
+	gradient.add_point(1.0, Color(0.7, 0.7, 1.0, 0.0))
+	var gradient_texture = GradientTexture2D.new()
+	gradient_texture.gradient = gradient
+	gradient_texture.width = 2
+	gradient_texture.height = 20
+	gradient_texture.fill_from = Vector2(0.5, 0)
+	gradient_texture.fill_to = Vector2(0.5, 1)
+	rain_particles.texture = gradient_texture
+	
+	# Posicionar en la parte superior central
+	rain_particles.position = Vector2(640, -50)
+	
+	# Añadir a la escena con layer bajo para que esté detrás de jugadores
+	rain_particles.z_index = -10
+	add_child(rain_particles)
+	
+	print("Sistema de lluvia creado")
+
+func _on_weather_received(is_raining: bool, weather_description: String) -> void:
+	print("Clima recibido: ", weather_description)
+	
+	if is_raining and rain_particles:
+		print("¡Activando lluvia en el escenario!")
+		rain_particles.emitting = true
+	else:
+		print("Sin lluvia, día despejado")
 
 func _create_victory_overlay() -> void:
 	# Crear CanvasLayer para el overlay de victoria

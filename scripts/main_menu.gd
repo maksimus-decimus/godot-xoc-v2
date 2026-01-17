@@ -22,6 +22,10 @@ var all_choices = []  # Array con todos los sprites choice
 func _ready() -> void:
 	MusicManager.play_music(MusicManager.TITLE_MUSIC)
 	
+	# Validar API del tiempo
+	WeatherAPI.api_validation_result.connect(_on_api_validation)
+	WeatherAPI.fetch_weather()
+	
 	# Inicializar arrays
 	all_buttons = [play_button, quit_button, profile_button]
 	all_choices = [play_choice, quit_choice, profile_choice]
@@ -49,6 +53,13 @@ func _ready() -> void:
 	
 	# Actualizar nombre del perfil
 	update_profile_display()
+	
+	# Validar API del tiempo
+	WeatherAPI.api_validation_result.connect(_on_api_validation)
+	WeatherAPI.fetch_weather()
+
+func _on_api_validation(is_valid: bool, message: String) -> void:
+	print(message)
 
 func _input(event: InputEvent) -> void:
 	# Detectar W/S para navegación
