@@ -5,7 +5,11 @@ const API_KEY = "3ee1b5e0ae06fb81149e6f6332a594dc"  # Obtén una gratis en https
 const CITY = "Barcelona"  # Cambia a tu ciudad
 const API_URL = "https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s"
 
-signal weather_data_received(is_raining: bool, weather_description: String)
+# MODO PRUEBA: Cambiar a true para forzar clima sin usar la API
+const FORCE_TEST_WEATHER = false  # true = modo prueba, false = API real
+const TEST_WEATHER_TYPE = "Lloviendo"  # Opciones: "Claro", "Nublado", "Llovizna", "Lloviendo", "Tormenta", "Nevando"
+
+signal weather_data_received(weather_type: String, weather_description: String)
 signal api_validation_result(is_valid: bool, message: String)
 
 var http_request: HTTPRequest
@@ -18,6 +22,15 @@ func _ready() -> void:
 	http_request.request_completed.connect(_on_request_completed)
 
 func fetch_weather() -> void:
+	# MODO PRUEBA: Forzar clima para testing
+	if FORCE_TEST_WEATHER:
+		print("MODO PRUEBA: Forzando clima - ", TEST_WEATHER_TYPE)
+		current_weather_type = TEST_WEATHER_TYPE
+		api_validation_result.emit(true, "✅ API del tiempo: MODO PRUEBA - " + TEST_WEATHER_TYPE)
+		weather_data_received.emit(current_weather_type, "Clima de prueba")
+		return
+	
+	# API Real
 	var url = API_URL % [CITY, API_KEY]
 	print("Consultando clima de ", CITY, "...")
 	
@@ -25,8 +38,8 @@ func fetch_weather() -> void:
 	if error != OK:
 		push_error("Error al hacer petición HTTP: ", error)
 		api_validation_result.emit(false, "❌ API del tiempo: Error de conexión")
-		# Emitir sin lluvia por defecto si falla
-		weather_data_received.emit(false, "Error de conexión")
+		# Emitir clima desconocido por defecto si falla
+		weather_data_received.emit("Desconocido", "Error de conexión")
 
 func _on_request_completed(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
 	if response_code != 200:
@@ -40,7 +53,7 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 		
 		push_error(error_msg)
 		api_validation_result.emit(false, error_msg)
-		weather_data_received.emit(false, "Error HTTP " + str(response_code))
+		weather_data_received.emit("Desconocido", "Error HTTP " + str(response_code))
 		return
 	
 	var json = JSON.new()
@@ -86,4 +99,4 @@ func _on_request_completed(result: int, response_code: int, headers: PackedStrin
 	
 	print("Clima actual: ", weather_description, " | ", current_weather_type)
 	api_validation_result.emit(true, "✅ API del tiempo: Conectada correctamente (" + CITY + ")")
-	weather_data_received.emit(is_raining, weather_description)
+	weather_data_received.emit(current_weather_type, weather_description)

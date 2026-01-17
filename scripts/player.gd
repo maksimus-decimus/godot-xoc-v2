@@ -31,6 +31,12 @@ var is_sprinting: bool = false
 var jumps_remaining: int = 2
 var can_wall_jump: bool = false
 
+# Efectos visuales (se asignan desde la escena)
+var sprint_effect: AnimatedSprite2D
+var jump_effect: AnimatedSprite2D
+var landing_effect: AnimatedSprite2D
+var was_in_air: bool = false
+
 # Doble tap para sprint
 var last_tap_time_right: float = 0.0
 var last_tap_time_left: float = 0.0
@@ -272,6 +278,40 @@ func setup_character() -> void:
 	
 	hp = max_hp
 
+func show_jump_effect() -> void:
+	if not jump_effect:
+		print("Player ", player_id, " no tiene jump_effect asignado!")
+		return
+	print("Player ", player_id, " activando jump effect")
+	jump_effect.visible = true
+	jump_effect.global_position = global_position + Vector2(0, 50)
+	if jump_effect.sprite_frames and jump_effect.sprite_frames.has_animation("default"):
+		jump_effect.play("default")
+	else:
+		print("Jump effect no tiene animación default!")
+	# Ocultar después de un momento
+	await get_tree().create_timer(0.3).timeout
+	if jump_effect:
+		jump_effect.stop()
+		jump_effect.visible = false
+
+func show_landing_effect() -> void:
+	if not landing_effect:
+		print("Player ", player_id, " no tiene landing_effect asignado!")
+		return
+	print("Player ", player_id, " activando landing effect")
+	landing_effect.visible = true
+	landing_effect.global_position = global_position + Vector2(0, 50)
+	if landing_effect.sprite_frames and landing_effect.sprite_frames.has_animation("default"):
+		landing_effect.play("default")
+	else:
+		print("Landing effect no tiene animación default!")
+	# Ocultar después de un momento
+	await get_tree().create_timer(0.4).timeout
+	if landing_effect:
+		landing_effect.stop()
+		landing_effect.visible = false
+
 func _physics_process(delta: float) -> void:
 	# Input según el jugador (leer inputs siempre)
 	var direction_x = 0.0
@@ -343,22 +383,54 @@ func _physics_process(delta: float) -> void:
 	if direction_x == 0 or (is_sprinting and sign(direction_x) != sign(tap_direction)):
 		is_sprinting = false
 	
+	# Controlar efecto de sprint
+	if sprint_effect:
+		if is_sprinting and is_on_floor():
+			if not sprint_effect.visible:
+				print("Player ", player_id, " activando sprint effect")
+				sprint_effect.visible = true
+				if sprint_effect.sprite_frames and sprint_effect.sprite_frames.has_animation("default"):
+					sprint_effect.play("default")
+					print("Animación playing")
+				else:
+					print("No tiene animación default configurada!")
+			# Posicionar detrás del jugador
+			sprint_effect.global_position = global_position + Vector2(-30 * sign(velocity.x) if velocity.x != 0 else -30, 0)
+			# Voltear según dirección
+			if velocity.x < 0:
+				sprint_effect.flip_h = true
+			elif velocity.x > 0:
+				sprint_effect.flip_h = false
+		else:
+			if sprint_effect.visible:
+				sprint_effect.stop()
+				sprint_effect.visible = false
+	
 	# Sistema de salto (normal, doble, wall jump)
 	if jump_pressed:
 		if is_on_floor():
 			# Salto normal desde el suelo
 			velocity.y = Global.JUMP_VELOCITY
 			jumps_remaining = 1  # Queda 1 salto (el doble salto)
+			# Activar efecto de salto
+			if jump_effect:
+				show_jump_effect()
 		elif can_wall_jump:
 			# Wall jump
 			var wall_normal = get_wall_normal()
 			velocity.x = wall_normal.x * Global.WALL_JUMP_VELOCITY.x
 			velocity.y = Global.WALL_JUMP_VELOCITY.y
 			jumps_remaining = 1  # Resetear para permitir doble salto después
+			# Activar efecto de salto
+			if jump_effect:
+				show_jump_effect()
 		elif jumps_remaining > 0:
 			# Doble salto en el aire
 			velocity.y = Global.JUMP_VELOCITY * 0.9  # Un poco menos potente
 			jumps_remaining -= 1
+			# Activar efecto de salto
+			if jump_effect:
+				show_jump_effect()
 	
 	# Movimiento horizontal
 	var current_speed = Global.SPRINT_SPEED if is_sprinting else Global.PLAYER_SPEED
@@ -367,6 +439,15 @@ func _physics_process(delta: float) -> void:
 		velocity.x = direction_x * current_speed
 	else:
 		velocity.x = move_toward(velocity.x, 0, current_speed * delta * 10)
+	
+	# Detectar aterrizaje después de estar en el aire
+	if is_on_floor() and was_in_air:
+		# Aterrizaje detectado
+		if landing_effect:
+			show_landing_effect()
+		was_in_air = false
+	elif not is_on_floor():
+		was_in_air = true
 	
 	# Actualizar dirección del golpe basado en input direccional
 	var hit_direction = Vector2.ZERO

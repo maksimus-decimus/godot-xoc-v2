@@ -65,14 +65,38 @@ vertical_alignment = 1
 
 [node name="MapNameLabel" type="Label" parent="CanvasLayer/CenterContainer/VBoxContainer"]
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_nqqve")
 theme_override_font_sizes/font_size = 28
-text = "Arena Clásica"
+text = "ARENA CLÁSICA"
 horizontal_alignment = 1
+
+[node name="MapNavigation" type="HBoxContainer" parent="CanvasLayer/CenterContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="PrevButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer/MapNavigation"]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_nqqve")
+theme_override_font_sizes/font_size = 32
+text = "◀"
+
+[node name="Spacer" type="Control" parent="CanvasLayer/CenterContainer/VBoxContainer/MapNavigation"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+
+[node name="NextButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer/MapNavigation"]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_nqqve")
+theme_override_font_sizes/font_size = 32
+text = "▶"
 
 [node name="StartButton" type="Button" parent="CanvasLayer/CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(300, 60)
 layout_mode = 2
 size_flags_horizontal = 4
+theme_override_fonts/font = ExtResource("2_nqqve")
 theme_override_font_sizes/font_size = 32
 text = "COMENZAR PARTIDA"
 

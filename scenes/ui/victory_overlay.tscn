@@ -1,0 +1,90 @@
+[gd_scene load_steps=5 format=3 uid="uid://cidbt3uno6oan"]
+
+[ext_resource type="Texture2D" uid="uid://ftpljyapvfn5" path="res://assets/hud/thatsawrap.png" id="1_hn3x2"]
+[ext_resource type="Texture2D" uid="uid://p07fayc13u0g" path="res://assets/hud/Fondo_victoria.png" id="2_ao4h2"]
+[ext_resource type="FontFile" uid="uid://o7os5dkgej1x" path="res://assets/font/Elements.ttf" id="2_p6xqv"]
+[ext_resource type="Texture2D" uid="uid://dssexkxo2pixv" path="res://assets/hud/button.png" id="3_e04om"]
+
+[node name="VictoryOverlay" type="CanvasLayer"]
+layer = 100
+
+[node name="VictoryBackground" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1280.0
+offset_bottom = 720.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="ThatsWrapSprite" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(640, 360)
+texture = ExtResource("1_hn3x2")
+
+[node name="FondoVictoria" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(640, 360)
+scale = Vector2(0.66355634, 1.1310345)
+texture = ExtResource("2_ao4h2")
+
+[node name="Revancha" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(432, 488)
+texture = ExtResource("3_e04om")
+
+[node name="CambiarPersonajes" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(760, 488)
+scale = Vector2(1.3333334, 1)
+texture = ExtResource("3_e04om")
+
+[node name="Volver" type="Sprite2D" parent="."]
+visible = false
+position = Vector2(636, 568)
+scale = Vector2(1.0333333, 1)
+texture = ExtResource("3_e04om")
+
+[node name="WinnerLabel" type="Label" parent="."]
+visible = false
+offset_left = 320.0
+offset_top = 296.0
+offset_right = 971.0
+offset_bottom = 396.0
+theme_override_fonts/font = ExtResource("2_p6xqv")
+theme_override_font_sizes/font_size = 64
+text = "¡JUGADOR X GANA!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RematchButton" type="Button" parent="."]
+visible = false
+offset_left = 340.0
+offset_top = 460.0
+offset_right = 540.0
+offset_bottom = 520.0
+theme_override_fonts/font = ExtResource("2_p6xqv")
+theme_override_font_sizes/font_size = 24
+text = "REVANCHA"
+
+[node name="ChangeCharactersButton" type="Button" parent="."]
+visible = false
+offset_left = 580.0
+offset_top = 460.0
+offset_right = 940.0
+offset_bottom = 520.0
+theme_override_fonts/font = ExtResource("2_p6xqv")
+theme_override_font_sizes/font_size = 24
+text = "CAMBIAR PERSONAJES"
+
+[node name="ContinueButton" type="Button" parent="."]
+visible = false
+offset_left = 490.0
+offset_top = 540.0
+offset_right = 790.0
+offset_bottom = 600.0
+theme_override_fonts/font = ExtResource("2_p6xqv")
+theme_override_font_sizes/font_size = 24
+text = "VOLVER AL MENÚ"

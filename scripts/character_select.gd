@@ -1,4 +1,4 @@
-extends Node2D
+extends Node
 
 # Audio players para sonidos de selección
 var char_select_audio: AudioStreamPlayer

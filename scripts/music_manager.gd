@@ -7,7 +7,21 @@ var music_player: AudioStreamPlayer
 # Referencias a las canciones
 const TITLE_MUSIC = "res://assets/msc/music/title.mp3"
 const CHAR_SELECT_MUSIC = "res://assets/msc/music/char_select.mp3"
-const STAGE_MUSIC = "res://assets/msc/music/stg_1.mp3"
+const STAGE_1_MUSIC = "res://assets/msc/music/stg_1.mp3"
+const STAGE_2_MUSIC = "res://assets/msc/music/stg_2.mp3"  # Agrega tu archivo de música aquí
+const STAGE_3_MUSIC = "res://assets/msc/music/stg_3.mp3"  # Agrega tu archivo de música aquí
+
+# Función helper para obtener música del mapa
+func get_stage_music(map_index: int) -> String:
+	match map_index:
+		0:
+			return STAGE_1_MUSIC
+		1:
+			return STAGE_2_MUSIC
+		2:
+			return STAGE_3_MUSIC
+		_:
+			return STAGE_1_MUSIC
 
 var current_track: String = ""
 

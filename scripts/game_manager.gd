@@ -7,14 +7,35 @@ extends Node
 @onready var camera = $Camera2D
 @onready var showtime_sprite = $ShowTime
 @onready var pause_menu = $PauseMenu
-@onready var background = $Mapa_1
 
-# Victory overlay (será creado dinámicamente)
+# Efectos visuales de jugadores
+@onready var p1_sprint_effect = $Player1/VisualContainer/P1_SprintEffect
+@onready var p1_jump_effect = $Player1/VisualContainer/P1_JumpEffect
+@onready var p1_landing_effect = $Player1/VisualContainer/P1_LandingEffect
+@onready var p2_sprint_effect = $Player2/VisualContainer/P2_SprintEffect
+@onready var p2_jump_effect = $Player2/VisualContainer/P2_JumpEffect
+@onready var p2_landing_effect = $Player2/VisualContainer/P2_LandingEffect
+
+# Mapas
+@onready var mapa_1 = $Mapa_1
+@onready var mapa_2 = $Mapa_2
+@onready var mapa_3 = $Mapa_3
+var background: TextureRect  # Referencia al mapa activo
+
+# Victory overlay (cargado desde escena)
 var victory_overlay: CanvasLayer
 var victory_background: ColorRect
 var thats_wrap_label: Sprite2D
 var winner_label: Label
+var rematch_button: Button
+var change_characters_button: Button
 var continue_button: Button
+
+# Sprites visuales de victoria
+var fondo_victoria_sprite: Sprite2D
+var revancha_sprite: Sprite2D
+var volver_sprite: Sprite2D
+var cambiar_personaje_sprite: Sprite2D
 var finale_audio: AudioStreamPlayer
 var victory_audio: AudioStreamPlayer
 var character_victory_audio: AudioStreamPlayer
@@ -42,6 +63,7 @@ var ultimate_audio: AudioStreamPlayer
 
 # Sistema de lluvia
 var rain_particles: GPUParticles2D
+var rain_audio: AudioStreamPlayer
 
 func _ready() -> void:
 	# Asegurar que el juego no esté pausado al iniciar
@@ -53,7 +75,21 @@ func _ready() -> void:
 	if pause_menu:
 		pause_menu.process_mode = Node.PROCESS_MODE_ALWAYS
 	
-	MusicManager.play_music(MusicManager.STAGE_MUSIC)
+	# Conectar efectos visuales a los jugadores
+	if player1:
+		player1.sprint_effect = p1_sprint_effect
+		player1.jump_effect = p1_jump_effect
+		player1.landing_effect = p1_landing_effect
+		print("P1 efectos asignados: sprint=", p1_sprint_effect != null, " jump=", p1_jump_effect != null, " landing=", p1_landing_effect != null)
+	
+	if player2:
+		player2.sprint_effect = p2_sprint_effect
+		player2.jump_effect = p2_jump_effect
+		player2.landing_effect = p2_landing_effect
+		print("P2 efectos asignados: sprint=", p2_sprint_effect != null, " jump=", p2_jump_effect != null, " landing=", p2_landing_effect != null)
+	
+	# Activar el mapa seleccionado y su música
+	_setup_map()
 	
 	# Ocultar ShowTime al inicio
 	if showtime_sprite:
@@ -540,64 +576,86 @@ func _create_rain_system() -> void:
 	# Posicionar en la parte superior central
 	rain_particles.position = Vector2(640, -50)
 	
-	# Añadir a la escena con layer bajo para que esté detrás de jugadores
-	rain_particles.z_index = -10
+	# Añadir a la escena con layer 1 para que esté delante del fondo
+	rain_particles.z_index = 1
 	add_child(rain_particles)
 	
 	print("Sistema de lluvia creado")
 
-func _on_weather_received(is_raining: bool, weather_description: String) -> void:
-	print("Clima recibido: ", weather_description)
+func _on_weather_received(weather_type: String, weather_description: String) -> void:
+	print("Clima recibido: ", weather_type, " - ", weather_description)
 	
-	if is_raining and rain_particles:
-		print("¡Activando lluvia en el escenario!")
-		rain_particles.emitting = true
-	else:
-		print("Sin lluvia, día despejado")
+	if not rain_particles:
+		return
+	
+	# Detener audio previo si existe
+	if rain_audio and rain_audio.playing:
+		rain_audio.stop()
+	
+	# Ajustar cantidad de partículas y audio según el tipo de clima
+	match weather_type:
+		"Llovizna":
+			print("¡Activando llovizna ligera!")
+			rain_particles.amount = 250  # Mitad de gotas
+			rain_particles.emitting = true
+			_play_rain_audio("res://sound/sfx/env/llovizna.wav", -5.0)  # Más bajo
+		"Lloviendo":
+			print("¡Activando lluvia normal!")
+			rain_particles.amount = 500  # Cantidad normal
+			rain_particles.emitting = true
+			_play_rain_audio("res://sound/sfx/env/lluvia.wav", 0.0)  # Volumen normal
+		"Tormenta":
+			print("¡Activando tormenta intensa!")
+			rain_particles.amount = 750  # Más gotas
+			rain_particles.emitting = true
+			_play_rain_audio("res://sound/sfx/env/lluvia.wav", 3.0)  # Más alto
+		_:
+			print("Sin lluvia, clima: ", weather_type)
+			rain_particles.emitting = false
+			if rain_audio:
+				rain_audio.stop()
+
+func _play_rain_audio(audio_path: String, volume_db: float) -> void:
+	if not rain_audio:
+		rain_audio = AudioStreamPlayer.new()
+		rain_audio.bus = "SFX"
+		add_child(rain_audio)
+	
+	var stream = load(audio_path)
+	if stream:
+		rain_audio.stream = stream
+		rain_audio.volume_db = volume_db
+		rain_audio.autoplay = false
+		var audio_stream_wav = stream as AudioStreamWAV
+		if audio_stream_wav:
+			audio_stream_wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		rain_audio.play()
+		print("Reproduciendo audio de lluvia: ", audio_path, " | Volumen: ", volume_db, " dB")
 
 func _create_victory_overlay() -> void:
-	# Crear CanvasLayer para el overlay de victoria
-	victory_overlay = CanvasLayer.new()
-	victory_overlay.layer = 100
-	victory_overlay.visible = false
+	# Cargar escena de victoria
+	var victory_scene = load("res://scenes/ui/victory_overlay.tscn")
+	victory_overlay = victory_scene.instantiate()
 	add_child(victory_overlay)
 	
-	# Fondo semitransparente (oculto inicialmente)
-	victory_background = ColorRect.new()
-	victory_background.color = Color(0, 0, 0, 0.7)
-	victory_background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	victory_background.visible = false
-	victory_overlay.add_child(victory_background)
+	# Obtener referencias a los nodos
+	victory_background = victory_overlay.get_node("VictoryBackground")
+	thats_wrap_label = victory_overlay.get_node("ThatsWrapSprite")
+	winner_label = victory_overlay.get_node("WinnerLabel")
+	rematch_button = victory_overlay.get_node("RematchButton")
+	change_characters_button = victory_overlay.get_node("ChangeCharactersButton")
+	continue_button = victory_overlay.get_node("ContinueButton")
 	
-	# Sprite "That's a wrap" (oculto inicialmente)
-	thats_wrap_label = Sprite2D.new()
-	thats_wrap_label.texture = load("res://assets/hud/thatsawrap.png")
-	thats_wrap_label.centered = true
-	thats_wrap_label.position = Vector2(640, 360)
-	thats_wrap_label.visible = false
-	victory_overlay.add_child(thats_wrap_label)
+	# Obtener sprites visuales
+	fondo_victoria_sprite = victory_overlay.get_node_or_null("FondoVictoria")
+	revancha_sprite = victory_overlay.get_node_or_null("Revancha")
+	volver_sprite = victory_overlay.get_node_or_null("Volver")
+	cambiar_personaje_sprite = victory_overlay.get_node_or_null("CambiarPersonajes")
 	
-	# Label del ganador (oculto inicialmente)
-	winner_label = Label.new()
-	winner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	winner_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	winner_label.set_anchors_preset(Control.PRESET_CENTER)
-	winner_label.position = Vector2(-250, -50)
-	winner_label.size = Vector2(500, 100)
-	winner_label.add_theme_font_size_override("font_size", 64)
-	winner_label.visible = false
-	victory_overlay.add_child(winner_label)
-	
-	# Botón continuar
-	continue_button = Button.new()
-	continue_button.text = "CONTINUAR"
-	continue_button.set_anchors_preset(Control.PRESET_CENTER)
-	continue_button.position = Vector2(-100, 100)
-	continue_button.size = Vector2(200, 60)
-	continue_button.add_theme_font_size_override("font_size", 24)
-	continue_button.visible = false
-	continue_button.pressed.connect(_on_victory_continue)
-	victory_overlay.add_child(continue_button)
+	# Conectar señales de los botones
+	rematch_button.pressed.connect(_on_rematch_pressed)
+	change_characters_button.pressed.connect(_on_change_characters_pressed)
+	continue_button.pressed.connect(_on_continue_pressed)
 
 func _show_thats_wrap() -> void:
 	# Reproducir sonido "That's a wrap"
@@ -685,8 +743,29 @@ func _show_victory_overlay() -> void:
 	# Mostrar ganador
 	winner_label.text = "¡JUGADOR %d GANA!" % winner
 	winner_label.visible = true
+	
+	# Mostrar FondoVictoria con WinnerLabel
+	if fondo_victoria_sprite:
+		fondo_victoria_sprite.visible = true
+		_animate_victory_sprite_entrance(fondo_victoria_sprite, 0.6)
+	
+	# Mostrar botones y sus sprites con animación escalonada
+	rematch_button.visible = true
+	if revancha_sprite:
+		revancha_sprite.visible = true
+		_animate_victory_sprite_entrance(revancha_sprite, 0.5)
+	
+	change_characters_button.visible = true
+	if cambiar_personaje_sprite:
+		cambiar_personaje_sprite.visible = true
+		_animate_victory_sprite_entrance(cambiar_personaje_sprite, 0.5)
+	
 	continue_button.visible = true
-	continue_button.grab_focus()
+	if volver_sprite:
+		volver_sprite.visible = true
+		_animate_victory_sprite_entrance(volver_sprite, 0.5)
+	
+	rematch_button.grab_focus()
 	
 	# Esperar a que termine el sonido de victoria, luego reproducir post_victory
 	await victory_audio.finished
@@ -699,6 +778,31 @@ func _show_victory_overlay() -> void:
 	var random_post = post_victory_files[randi() % post_victory_files.size()]
 	victory_audio.stream = load(random_post)
 	victory_audio.play()
+
+func _setup_map() -> void:
+	# Ocultar todos los mapas
+	mapa_1.visible = false
+	mapa_2.visible = false
+	mapa_3.visible = false
+	
+	# Activar el mapa seleccionado
+	match Global.selected_map:
+		0:
+			mapa_1.visible = true
+			background = mapa_1
+		1:
+			mapa_2.visible = true
+			background = mapa_2
+		2:
+			mapa_3.visible = true
+			background = mapa_3
+		_:
+			mapa_1.visible = true
+			background = mapa_1
+	
+	# Reproducir música del mapa
+	var stage_music = MusicManager.get_stage_music(Global.selected_map)
+	MusicManager.play_music(stage_music)
 
 func _load_character_victory_sprites(character: int) -> void:
 	victory_animation_frames.clear()
@@ -732,7 +836,40 @@ func _animate_character_victory(player: Node) -> void:
 		frame_index = (frame_index + 1) % victory_animation_frames.size()
 		await get_tree().create_timer(0.15).timeout
 
+func _on_rematch_pressed() -> void:
+	UISounds.play_select()
+	# Ocultar overlay de victoria
+	if victory_overlay:
+		victory_overlay.visible = false
+	# Resetear solo vidas y winner (mantiene personajes)
+	Global.reset_match()
+	# Reiniciar la partida con los mismos personajes
+	SceneTransition.loading_screen_to_scene("res://scenes/game.tscn")
+
+func _on_change_characters_pressed() -> void:
+	UISounds.play_select()
+	# Ocultar overlay de victoria
+	if victory_overlay:
+		victory_overlay.visible = false
+	# Resetear el juego completamente
+	Global.reset_game()
+	# Volver a la selección de personajes
+	SceneTransition.loading_screen_to_scene("res://scenes/character_select_new.tscn")
+
+func _on_continue_pressed() -> void:
+	UISounds.play_select()
+	# Ocultar overlay de victoria
+	if victory_overlay:
+		victory_overlay.visible = false
+	# Resetear el juego completamente
+	Global.reset_game()
+	# Volver al menú principal
+	SceneTransition.loading_screen_to_scene("res://scenes/main_menu.tscn")
+
 func _vibrate_sprite(sprite: Sprite2D) -> void:
+	if not sprite:
+		return
+		
 	var original_position = sprite.position
 	var shake_amount = 5.0
 	
@@ -745,6 +882,39 @@ func _vibrate_sprite(sprite: Sprite2D) -> void:
 		await get_tree().create_timer(0.05).timeout
 	
 	# Restaurar posición original
+	sprite.position = original_position
+
+func _animate_victory_sprite_entrance(sprite: Sprite2D, duration: float) -> void:
+	if not sprite:
+		return
+	
+	# Guardar escala y posición originales
+	var original_scale = sprite.scale
+	var original_position = sprite.position
+	var shake_amount = 5.0
+	
+	# Empezar grande (como si viniera del fondo)
+	sprite.scale = original_scale * 2.5
+	
+	# Animar hasta la escala original
+	var scale_tween = create_tween()
+	scale_tween.set_ease(Tween.EASE_OUT)
+	scale_tween.set_trans(Tween.TRANS_BACK)
+	scale_tween.tween_property(sprite, "scale", original_scale, duration)
+	
+	# Vibrar solo durante la animación de entrada
+	var elapsed_time = 0.0
+	var shake_interval = 0.05
+	
+	while elapsed_time < duration:
+		sprite.position = original_position + Vector2(
+			randf_range(-shake_amount, shake_amount),
+			randf_range(-shake_amount, shake_amount)
+		)
+		await get_tree().create_timer(shake_interval).timeout
+		elapsed_time += shake_interval
+	
+	# Restaurar posición original al terminar
 	sprite.position = original_position
 
 func _on_victory_continue() -> void:

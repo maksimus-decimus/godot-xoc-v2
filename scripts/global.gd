@@ -51,6 +51,13 @@ func reset_game() -> void:
 	selected_map = 0
 	game_should_start = true
 
+# Reiniciar solo el match (mantiene personajes seleccionados)
+func reset_match() -> void:
+	player1_lives = MAX_LIVES
+	player2_lives = MAX_LIVES
+	winner = 0
+	game_should_start = true
+
 # Restar una vida a un jugador
 func player_lost_life(player_id: int) -> void:
 	if player_id == 1:
