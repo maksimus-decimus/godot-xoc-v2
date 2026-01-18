@@ -615,10 +615,24 @@ func death_animation(knockback_direction: Vector2) -> void:
 	hit_area.monitoring = false
 	
 	print("Iniciando animación de muerte para jugador ", player_id)
+	print("Knockback direction recibido: ", knockback_direction)
 	
-	# Impulso inicial mucho más suave
-	velocity.x = knockback_direction.x * 300  # Movimiento horizontal moderado
-	velocity.y = -500  # Impulso hacia arriba moderado
+	# Asegurar que SIEMPRE haya movimiento horizontal significativo
+	var horizontal_force = knockback_direction.x
+	
+	# Si el knockback es muy vertical (poca componente horizontal), forzar dirección horizontal
+	if abs(horizontal_force) < 0.3:
+		# Usar la posición del jugador para determinar dirección
+		# Si está a la izquierda de la pantalla, empujar a la izquierda
+		# Si está a la derecha, empujar a la derecha
+		horizontal_force = -1.0 if position.x < 640 else 1.0
+		print("Forzando dirección horizontal: ", horizontal_force)
+	
+	# Impulso inicial con garantía de movimiento horizontal
+	velocity.x = horizontal_force * 400  # Movimiento horizontal garantizado
+	velocity.y = -600  # Impulso hacia arriba
+	
+	print("Velocidad inicial: ", velocity)
 	
 	# Límites de la pantalla para rebotes
 	var screen_left = 20.0
@@ -630,7 +644,7 @@ func death_animation(knockback_direction: Vector2) -> void:
 	var bounce_dampening = 0.5
 	
 	# Variable para rotación suave
-	var rotation_speed = 2.0 * sign(knockback_direction.x)  # Gira según dirección del golpe
+	var rotation_speed = 2.0 * sign(horizontal_force)  # Gira según dirección horizontal
 	
 	# Animación de rebotes y caída
 	var flight_time = 5.0  # Duración total aumentada
@@ -662,15 +676,18 @@ func death_animation(knockback_direction: Vector2) -> void:
 			position.x = screen_left
 			velocity.x = abs(velocity.x) * bounce_dampening
 			rotation_speed *= -0.8  # Invertir rotación al rebotar
+			print("Rebote en pared izquierda - nueva velocidad: ", velocity)
 		elif position.x > screen_right:
 			position.x = screen_right
 			velocity.x = -abs(velocity.x) * bounce_dampening
 			rotation_speed *= -0.8  # Invertir rotación al rebotar
+			print("Rebote en pared derecha - nueva velocidad: ", velocity)
 		
 		# Rebote en techo (más suave)
 		if position.y < screen_top:
 			position.y = screen_top
 			velocity.y = abs(velocity.y) * bounce_dampening
+			print("Rebote en techo - nueva velocidad: ", velocity)
 		
 		# Si cae por debajo de la pantalla, terminar animación
 		if position.y > screen_bottom:
