@@ -85,12 +85,6 @@ var sprites = {
 # Sprites de animación de ultimate (array de frames)
 var ultimate_frames: Array[Texture2D] = []
 
-# Animación idle (array de frames)
-var idle_frames: Array[Texture2D] = []
-var current_idle_frame: int = 0
-var idle_frame_timer: float = 0.0
-const IDLE_ANIM_SPEED: float = 0.15
-
 var current_sprite_state: String = "idle"
 var has_sprites: bool = false
 
@@ -157,20 +151,6 @@ func load_character_sprites() -> void:
 			if ResourceLoader.exists(base_path + "skill3_5.png"):
 				ultimate_frames.append(load(base_path + "skill3_5.png"))
 			
-			# Cargar animación idle desde carpeta específica
-			var idle_anim_path = base_path + "animated/idle animated/"
-			idle_frames.clear()
-			var frame_idx = 1
-			# Intentar cargar idle_1.png, idle_2.png...
-			while ResourceLoader.exists(idle_anim_path + "idle_" + str(frame_idx) + ".png"):
-				idle_frames.append(load(idle_anim_path + "idle_" + str(frame_idx) + ".png"))
-				frame_idx += 1
-			# Si no, intentar 1.png, 2.png...
-			if idle_frames.is_empty():
-				frame_idx = 1
-				while ResourceLoader.exists(idle_anim_path + str(frame_idx) + ".png"):
-					idle_frames.append(load(idle_anim_path + str(frame_idx) + ".png"))
-					frame_idx += 1
 		elif character == 1:  # Ishmael - ultra
 			sprites["ultimate"] = load(base_path + "ultra_1.png")
 			ultimate_frames.append(load(base_path + "ultra_1.png"))
@@ -193,15 +173,6 @@ func load_character_sprites() -> void:
 		sprite_node.visible = false
 		print("No se encontraron sprites, usando placeholder")
 
-func _process(delta: float) -> void:
-	# Procesar animación de idle si estamos en ese estado y hay frames cargados
-	if current_sprite_state == "idle" and not idle_frames.is_empty():
-		idle_frame_timer += delta
-		if idle_frame_timer >= IDLE_ANIM_SPEED:
-			idle_frame_timer = 0.0
-			current_idle_frame = (current_idle_frame + 1) % idle_frames.size()
-			sprite_node.texture = idle_frames[current_idle_frame]
-
 func update_sprite_state(state: String) -> void:
 	if not has_sprites or current_sprite_state == state:
 		return
@@ -209,12 +180,6 @@ func update_sprite_state(state: String) -> void:
 	if sprites.has(state) and sprites[state] != null:
 		sprite_node.texture = sprites[state]
 		current_sprite_state = state
-		
-		# Si entramos a idle y hay animación, resetear al primer frame
-		if state == "idle" and not idle_frames.is_empty():
-			current_idle_frame = 0
-			idle_frame_timer = 0.0
-			sprite_node.texture = idle_frames[0]
 		
 		# Aplicar offset específico para cada sprite
 		sprite_node.centered = true
@@ -646,36 +611,77 @@ func death_animation(knockback_direction: Vector2) -> void:
 	# Reproducir sonido de daño
 	play_random_hit_sound()
 	
-	# Desactivar colisión para que no interfiera
-	collision_shape.set_deferred("disabled", true)
+	# Desactivar colisión con pelota y hitarea
 	hit_area.monitoring = false
 	
 	print("Iniciando animación de muerte para jugador ", player_id)
 	
-	# Impulso inicial: salta hacia arriba y cae fuera de la escena
-	velocity.x = knockback_direction.x * 150  # Un poco de movimiento horizontal
-	velocity.y = -400  # Impulso hacia arriba
+	# Impulso inicial mucho más suave
+	velocity.x = knockback_direction.x * 300  # Movimiento horizontal moderado
+	velocity.y = -500  # Impulso hacia arriba moderado
 	
-	# Animación de salto y caída (sin rotación ni fade)
-	var flight_time = 2.5  # Duración de la animación
+	# Límites de la pantalla para rebotes
+	var screen_left = 20.0
+	var screen_right = 1260.0
+	var screen_top = 20.0
+	var screen_bottom = 1400.0  # Mucho más abajo para que caiga más tiempo
+	
+	# Coeficiente de rebote más suave (menos rebote)
+	var bounce_dampening = 0.5
+	
+	# Variable para rotación suave
+	var rotation_speed = 2.0 * sign(knockback_direction.x)  # Gira según dirección del golpe
+	
+	# Animación de rebotes y caída
+	var flight_time = 5.0  # Duración total aumentada
 	var elapsed = 0.0
+	
+	# Para fade out gradual
+	var fade_start_y = 720.0  # Comenzar a desvanecerse cuando sale de pantalla
 	
 	while elapsed < flight_time and is_inside_tree():
 		var delta = get_physics_process_delta_time()
 		elapsed += delta
 		
-		# Aplicar gravedad normal para caída natural
-		velocity.y += Global.GRAVITY * delta
+		# Aplicar gravedad para caída natural (aún más reducida)
+		velocity.y += (Global.GRAVITY * 0.6) * delta
+		
+		# Rotación suave del sprite
+		visual_container.rotation += rotation_speed * delta
 		
 		# Mover
 		position += velocity * delta
+		
+		# Fade out gradual cuando cae fuera de la pantalla visible
+		if position.y > fade_start_y:
+			var fade_progress = (position.y - fade_start_y) / (screen_bottom - fade_start_y)
+			visual_container.modulate.a = max(0.0, 1.0 - fade_progress)
+		
+		# Rebote en paredes laterales (más suave)
+		if position.x < screen_left:
+			position.x = screen_left
+			velocity.x = abs(velocity.x) * bounce_dampening
+			rotation_speed *= -0.8  # Invertir rotación al rebotar
+		elif position.x > screen_right:
+			position.x = screen_right
+			velocity.x = -abs(velocity.x) * bounce_dampening
+			rotation_speed *= -0.8  # Invertir rotación al rebotar
+		
+		# Rebote en techo (más suave)
+		if position.y < screen_top:
+			position.y = screen_top
+			velocity.y = abs(velocity.y) * bounce_dampening
+		
+		# Si cae por debajo de la pantalla, terminar animación
+		if position.y > screen_bottom:
+			break
 		
 		if is_inside_tree():
 			await get_tree().process_frame
 		else:
 			break
 	
-	print("Animación de muerte completada para jugador ", player_id)
+	print("Animación de muerte completada para jugador ", player_id, " (duración: ", elapsed, "s)")
 	
 	# Resetear is_dead al final de la animación
 	is_dead = false
