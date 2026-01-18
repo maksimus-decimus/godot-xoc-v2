@@ -37,6 +37,15 @@ func play_music(track_path: String):
 	
 	current_track = track_path
 	var stream = load(track_path)
+	
+	# Configurar loop según el tipo de archivo
+	if stream is AudioStreamMP3:
+		stream.loop = true
+	elif stream is AudioStreamOggVorbis:
+		stream.loop = true
+	elif stream is AudioStreamWAV:
+		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	
 	music_player.stream = stream
 	music_player.play()
 

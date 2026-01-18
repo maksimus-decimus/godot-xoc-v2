@@ -85,6 +85,12 @@ var sprites = {
 # Sprites de animación de ultimate (array de frames)
 var ultimate_frames: Array[Texture2D] = []
 
+# Animación idle (array de frames)
+var idle_frames: Array[Texture2D] = []
+var current_idle_frame: int = 0
+var idle_frame_timer: float = 0.0
+const IDLE_ANIM_SPEED: float = 0.15
+
 var current_sprite_state: String = "idle"
 var has_sprites: bool = false
 
@@ -150,6 +156,21 @@ func load_character_sprites() -> void:
 			ultimate_frames.append(load(base_path + "skill3_4.png"))
 			if ResourceLoader.exists(base_path + "skill3_5.png"):
 				ultimate_frames.append(load(base_path + "skill3_5.png"))
+			
+			# Cargar animación idle desde carpeta específica
+			var idle_anim_path = base_path + "animated/idle animated/"
+			idle_frames.clear()
+			var frame_idx = 1
+			# Intentar cargar idle_1.png, idle_2.png...
+			while ResourceLoader.exists(idle_anim_path + "idle_" + str(frame_idx) + ".png"):
+				idle_frames.append(load(idle_anim_path + "idle_" + str(frame_idx) + ".png"))
+				frame_idx += 1
+			# Si no, intentar 1.png, 2.png...
+			if idle_frames.is_empty():
+				frame_idx = 1
+				while ResourceLoader.exists(idle_anim_path + str(frame_idx) + ".png"):
+					idle_frames.append(load(idle_anim_path + str(frame_idx) + ".png"))
+					frame_idx += 1
 		elif character == 1:  # Ishmael - ultra
 			sprites["ultimate"] = load(base_path + "ultra_1.png")
 			ultimate_frames.append(load(base_path + "ultra_1.png"))
@@ -172,6 +193,15 @@ func load_character_sprites() -> void:
 		sprite_node.visible = false
 		print("No se encontraron sprites, usando placeholder")
 
+func _process(delta: float) -> void:
+	# Procesar animación de idle si estamos en ese estado y hay frames cargados
+	if current_sprite_state == "idle" and not idle_frames.is_empty():
+		idle_frame_timer += delta
+		if idle_frame_timer >= IDLE_ANIM_SPEED:
+			idle_frame_timer = 0.0
+			current_idle_frame = (current_idle_frame + 1) % idle_frames.size()
+			sprite_node.texture = idle_frames[current_idle_frame]
+
 func update_sprite_state(state: String) -> void:
 	if not has_sprites or current_sprite_state == state:
 		return
@@ -179,6 +209,12 @@ func update_sprite_state(state: String) -> void:
 	if sprites.has(state) and sprites[state] != null:
 		sprite_node.texture = sprites[state]
 		current_sprite_state = state
+		
+		# Si entramos a idle y hay animación, resetear al primer frame
+		if state == "idle" and not idle_frames.is_empty():
+			current_idle_frame = 0
+			idle_frame_timer = 0.0
+			sprite_node.texture = idle_frames[0]
 		
 		# Aplicar offset específico para cada sprite
 		sprite_node.centered = true
