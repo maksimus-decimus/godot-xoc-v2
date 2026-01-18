@@ -615,90 +615,87 @@ func death_animation(knockback_direction: Vector2) -> void:
 	hit_area.monitoring = false
 	
 	print("Iniciando animación de muerte para jugador ", player_id)
-	print("Knockback direction recibido: ", knockback_direction)
 	
-	# Asegurar que SIEMPRE haya movimiento horizontal significativo
+	# Determinar dirección horizontal del knockback
 	var horizontal_force = knockback_direction.x
 	
-	# Si el knockback es muy vertical (poca componente horizontal), forzar dirección horizontal
+	# Si el knockback es muy vertical, forzar dirección basada en posición
 	if abs(horizontal_force) < 0.3:
-		# Usar la posición del jugador para determinar dirección
-		# Si está a la izquierda de la pantalla, empujar a la izquierda
-		# Si está a la derecha, empujar a la derecha
 		horizontal_force = -1.0 if position.x < 640 else 1.0
-		print("Forzando dirección horizontal: ", horizontal_force)
 	
-	# Impulso inicial con garantía de movimiento horizontal
-	velocity.x = horizontal_force * 400  # Movimiento horizontal garantizado
-	velocity.y = -600  # Impulso hacia arriba
+	# Normalizar dirección horizontal
+	var direction = sign(horizontal_force)
 	
-	print("Velocidad inicial: ", velocity)
-	
-	# Límites de la pantalla para rebotes
+	# Límites de la pantalla
 	var screen_left = 20.0
 	var screen_right = 1260.0
-	var screen_top = 20.0
-	var screen_bottom = 1400.0  # Mucho más abajo para que caiga más tiempo
+	var screen_center_x = 640.0
+	var screen_bottom = 1400.0
 	
-	# Coeficiente de rebote más suave (menos rebote)
-	var bounce_dampening = 0.5
+	# FASE 1: Impulso inicial hacia arriba y al lado
+	var initial_velocity = Vector2(direction * 400, -600)
 	
-	# Variable para rotación suave
-	var rotation_speed = 2.0 * sign(horizontal_force)  # Gira según dirección horizontal
+	# Calcular trayectoria parabólica determinista
+	var gravity = Global.GRAVITY * 0.6
+	var total_duration = 3.0
+	var time_step = 1.0 / 60.0  # Simular a 60 FPS para consistencia
 	
-	# Animación de rebotes y caída
-	var flight_time = 5.0  # Duración total aumentada
+	var current_pos = position
+	var current_vel = initial_velocity
+	var current_rotation = 0.0
+	var rotation_speed = 3.0 * direction
+	
 	var elapsed = 0.0
+	var bounce_dampening = 0.6
 	
-	# Para fade out gradual
-	var fade_start_y = 720.0  # Comenzar a desvanecerse cuando sale de pantalla
-	
-	while elapsed < flight_time and is_inside_tree():
-		var delta = get_physics_process_delta_time()
-		elapsed += delta
+	# Simular física frame por frame de forma determinista
+	while elapsed < total_duration and is_inside_tree():
+		# Aplicar gravedad
+		current_vel.y += gravity * time_step
 		
-		# Aplicar gravedad para caída natural (aún más reducida)
-		velocity.y += (Global.GRAVITY * 0.6) * delta
+		# Actualizar posición
+		current_pos += current_vel * time_step
 		
-		# Rotación suave del sprite
-		visual_container.rotation += rotation_speed * delta
+		# Actualizar rotación
+		current_rotation += rotation_speed * time_step
 		
-		# Mover
-		position += velocity * delta
+		# Rebotes en paredes laterales
+		if current_pos.x < screen_left:
+			current_pos.x = screen_left
+			current_vel.x = abs(current_vel.x) * bounce_dampening
+			rotation_speed *= -0.7
+		elif current_pos.x > screen_right:
+			current_pos.x = screen_right
+			current_vel.x = -abs(current_vel.x) * bounce_dampening
+			rotation_speed *= -0.7
 		
-		# Fade out gradual cuando cae fuera de la pantalla visible
-		if position.y > fade_start_y:
-			var fade_progress = (position.y - fade_start_y) / (screen_bottom - fade_start_y)
+		# Rebote en techo
+		if current_pos.y < 20:
+			current_pos.y = 20
+			current_vel.y = abs(current_vel.y) * bounce_dampening
+		
+		# Aplicar transformaciones al personaje
+		position = current_pos
+		visual_container.rotation = current_rotation
+		
+		# Fade out cuando cae
+		if current_pos.y > 720:
+			var fade_progress = (current_pos.y - 720) / (screen_bottom - 720)
 			visual_container.modulate.a = max(0.0, 1.0 - fade_progress)
 		
-		# Rebote en paredes laterales (más suave)
-		if position.x < screen_left:
-			position.x = screen_left
-			velocity.x = abs(velocity.x) * bounce_dampening
-			rotation_speed *= -0.8  # Invertir rotación al rebotar
-			print("Rebote en pared izquierda - nueva velocidad: ", velocity)
-		elif position.x > screen_right:
-			position.x = screen_right
-			velocity.x = -abs(velocity.x) * bounce_dampening
-			rotation_speed *= -0.8  # Invertir rotación al rebotar
-			print("Rebote en pared derecha - nueva velocidad: ", velocity)
-		
-		# Rebote en techo (más suave)
-		if position.y < screen_top:
-			position.y = screen_top
-			velocity.y = abs(velocity.y) * bounce_dampening
-			print("Rebote en techo - nueva velocidad: ", velocity)
-		
-		# Si cae por debajo de la pantalla, terminar animación
-		if position.y > screen_bottom:
+		# Terminar si cae muy abajo
+		if current_pos.y > screen_bottom:
 			break
 		
+		elapsed += time_step
+		
+		# Esperar al siguiente frame real (pero la física es independiente)
 		if is_inside_tree():
 			await get_tree().process_frame
 		else:
 			break
 	
-	print("Animación de muerte completada para jugador ", player_id, " (duración: ", elapsed, "s)")
+	print("Animación de muerte completada para jugador ", player_id)
 	
 	# Resetear is_dead al final de la animación
 	is_dead = false
