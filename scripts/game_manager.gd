@@ -838,6 +838,13 @@ func _animate_character_victory(player: Node) -> void:
 
 func _on_rematch_pressed() -> void:
 	UISounds.play_select()
+	
+	# Actualizar estadísticas del perfil antes de resetear
+	if not UserProfile.current_profile_name.is_empty():
+		var player1_character = Global.player1_character
+		var player_won = Global.winner == 1
+		UserProfile.update_stats(player_won, player1_character)
+	
 	# Ocultar overlay de victoria
 	if victory_overlay:
 		victory_overlay.visible = false
@@ -848,6 +855,13 @@ func _on_rematch_pressed() -> void:
 
 func _on_change_characters_pressed() -> void:
 	UISounds.play_select()
+	
+	# Actualizar estadísticas del perfil antes de resetear
+	if not UserProfile.current_profile_name.is_empty():
+		var player1_character = Global.player1_character
+		var player_won = Global.winner == 1
+		UserProfile.update_stats(player_won, player1_character)
+	
 	# Ocultar overlay de victoria
 	if victory_overlay:
 		victory_overlay.visible = false
@@ -858,6 +872,13 @@ func _on_change_characters_pressed() -> void:
 
 func _on_continue_pressed() -> void:
 	UISounds.play_select()
+	
+	# Actualizar estadísticas del perfil antes de resetear
+	if not UserProfile.current_profile_name.is_empty():
+		var player1_character = Global.player1_character
+		var player_won = Global.winner == 1
+		UserProfile.update_stats(player_won, player1_character)
+	
 	# Ocultar overlay de victoria
 	if victory_overlay:
 		victory_overlay.visible = false

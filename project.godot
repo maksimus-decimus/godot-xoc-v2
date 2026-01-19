@@ -13,7 +13,8 @@ config_version=5
 config/name="Xoc v2"
 run/main_scene="res://scenes/intro.tscn"
 config/features=PackedStringArray("4.5", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://l2lref3gtxy4"
+config/windows_native_icon="res://pryct_xoc.ico"
 
 [autoload]
 
