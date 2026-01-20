@@ -4,6 +4,10 @@ extends CharacterBody2D
 @onready var hit_sprite = $HitSprite
 @onready var collision_shape = $CollisionShape2D
 
+# Nodo de shockwave (se creará dinámicamente)
+var shockwave_node: ColorRect = null
+var shockwave_material: ShaderMaterial = null
+
 # Arrays de variantes de sonidos
 var weak_sounds: Array[AudioStream] = []
 var medium_sounds: Array[AudioStream] = []
@@ -51,6 +55,9 @@ func _ready() -> void:
 	hit_sprite.visible = false
 	# Iniciar en estado neutral
 	update_tag_color()
+	
+	# Inicializar el nodo de shockwave
+	setup_shockwave()
 
 func _physics_process(delta: float) -> void:
 	# Rotar la pelota continuamente
@@ -181,6 +188,8 @@ func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> v
 		freeze_player(player)
 		# Mostrar sprite de golpe orientado según dirección
 		show_hit_effect()
+		# ¡ACTIVAR EFECTO DE SHOCKWAVE!
+		play_shockwave_effect()
 
 func show_hit_effect() -> void:
 	# Mostrar sprite de golpe orientado según la dirección
@@ -247,3 +256,60 @@ func reset_ball(spawn_position: Vector2) -> void:
 	sprite.modulate = Color.WHITE
 	sprite.scale = Vector2(ball_scale, ball_scale)
 	hit_sprite.visible = false
+
+func setup_shockwave() -> void:
+	# Crear el nodo de shockwave
+	shockwave_node = ColorRect.new()
+	shockwave_node.name = "ShockwaveEffect"
+	shockwave_node.size = Vector2(1000, 1000)  # Área muy grande para el efecto
+	shockwave_node.position = Vector2(-500, -500)  # Centrado en la pelota
+	shockwave_node.z_index = 100  # Por encima de todo
+	shockwave_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shockwave_node.visible = false
+	
+	# Crear y configurar el shader material
+	shockwave_material = ShaderMaterial.new()
+	var shader = load("res://assets/msc/shockwave.gdshader")
+	shockwave_material.shader = shader
+	
+	# Configurar parámetros para distorsión de pantalla
+	shockwave_material.set_shader_parameter("wave_progress", 0.0)
+	shockwave_material.set_shader_parameter("wave_strength", 0.05)  # Intensidad de distorsión
+	shockwave_material.set_shader_parameter("wave_thickness", 0.12)
+	shockwave_material.set_shader_parameter("wave_center", Vector2(0.5, 0.5))
+	
+	# Configurar color base del ColorRect (completamente transparente)
+	shockwave_node.color = Color(0.0, 0.0, 0.0, 0.0)
+	
+	# Asignar material al ColorRect
+	shockwave_node.material = shockwave_material
+	
+	# Agregar como hijo de la pelota
+	add_child(shockwave_node)
+
+func play_shockwave_effect() -> void:
+	if shockwave_node == null or shockwave_material == null:
+		return
+	
+	# Hacer visible el efecto
+	shockwave_node.visible = true
+	
+	# Resetear el progreso
+	shockwave_material.set_shader_parameter("wave_progress", 0.0)
+	
+	# Animar la onda de choque durante 1 segundo (duración del freeze)
+	var tween = create_tween()
+	tween.tween_method(
+		func(value: float):
+			if shockwave_material:
+				shockwave_material.set_shader_parameter("wave_progress", value),
+		0.0,
+		1.5,  # Expandir más allá del área visible para efecto completo
+		1.0   # 1 segundo de duración
+	)
+	
+	# Ocultar después de la animación
+	tween.tween_callback(func(): 
+		if shockwave_node:
+			shockwave_node.visible = false
+	)
