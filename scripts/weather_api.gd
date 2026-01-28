@@ -1,7 +1,7 @@
 extends Node
 
 # Configuración de la API
-const API_KEY = "3ee1b5e0ae06fb81149e6f6332a594dc"  # Obtén una gratis en https://openweathermap.org/api
+const API_KEY = "3ee1b5e0ae06fb81149e6f6332a594dc"  
 const CITY = "Barcelona"  # Cambia a tu ciudad
 const API_URL = "https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s"
 

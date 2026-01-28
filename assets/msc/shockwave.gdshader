@@ -48,8 +48,13 @@ void fragment() {
         distortion += dir_from_center * wave_pattern * distortion_intensity * wave_strength * 0.3;
     }
     
+    // Ajustar distorsión según el aspecto de la pantalla para que sea circular
+    vec2 final_distortion = distortion;
+    float aspect_ratio = SCREEN_PIXEL_SIZE.y / SCREEN_PIXEL_SIZE.x;
+    final_distortion.y *= aspect_ratio;
+
     // Calcular UV para SCREEN_TEXTURE
-    vec2 screen_uv = SCREEN_UV + distortion;
+    vec2 screen_uv = SCREEN_UV + final_distortion;
     
     // Obtener color de la pantalla con distorsión aplicada
     vec4 screen_color = texture(SCREEN_TEXTURE, screen_uv);

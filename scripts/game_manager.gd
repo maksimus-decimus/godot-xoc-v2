@@ -218,6 +218,13 @@ func respawn_round(defeated_player_id: int) -> void:
 	ball.set_physics_process(true)
 	ball_active = true
 	hud.update_ball_speed(Global.INITIAL_BALL_SPEED)
+	
+	# Resetear efectos visuales de jugadores y fondo
+	if player1:
+		player1.set_inverted_colors(false)
+	if player2:
+		player2.set_inverted_colors(false)
+	reset_background_effect()
 
 func _on_ball_hit_player(player_id: int, damage: float) -> void:
 	pass  # Ya se maneja en player_damaged
@@ -225,16 +232,60 @@ func _on_ball_hit_player(player_id: int, damage: float) -> void:
 func _on_ball_speed_changed(new_speed: float) -> void:
 	hud.update_ball_speed(new_speed)
 	update_background_effect(new_speed)
+	
+	# Actualizar intensidad visual en jugadores (outline)
+	var owner_id = ball.owner_player_id
+	if player1:
+		player1.update_intensity(new_speed, owner_id)
+	if player2:
+		player2.update_intensity(new_speed, owner_id)
 
 func update_background_effect(speed: float) -> void:
 	if not background:
 		return
 	
-	# Calcular progreso entre MEDIUM (inicio anaranjado) y MAX
-	var progress = clamp((speed - Global.MEDIUM_THRESHOLD) / (Global.MAX_BALL_SPEED - Global.MEDIUM_THRESHOLD), 0.0, 1.0)
+	# Gestionar inversión de colores de jugadores (>= 4000)
+	var invert_players = speed >= Global.SPEED_LIMIT_1
+	if player1: player1.set_inverted_colors(invert_players)
+	if player2: player2.set_inverted_colors(invert_players)
 	
+	# Gestionar Shockwave al cruzar el primer límite (4000)
+	# Usamos una variable estática o de instancia para rastrear si ya se disparó
+	# Como es GDScript simple, usaremos el estado actual del material como flag indirecto o añadiremos una variable
+	if speed >= Global.SPEED_LIMIT_1 and background.material == null and speed < Global.MAX_BALL_SPEED:
+		_trigger_mega_shockwave()
+	
+	# Fase 3: EL VACÍO (>= 8000)
 	if speed >= Global.MAX_BALL_SPEED:
-		# Efecto de flash y negativo al llegar al máximo
+		# Fondo negro absoluto (VOID MODE)
+		if background.material:
+			background.material = null # Quitar shader de inversión
+		
+		# Transición a negro si no está ya
+		if background.modulate != Color.BLACK:
+			var void_tween = create_tween()
+			void_tween.tween_property(background, "modulate", Color.BLACK, 0.5)
+			
+			# Flash blanco muy intenso antes del negro
+			var flash = CanvasLayer.new()
+			flash.layer = 100
+			add_child(flash)
+			var rect = ColorRect.new()
+			rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+			rect.color = Color.WHITE
+			rect.modulate.a = 0.0
+			flash.add_child(rect)
+			
+			var ft = create_tween()
+			ft.tween_property(rect, "modulate:a", 1.0, 0.1)
+			ft.tween_property(rect, "modulate:a", 0.0, 0.5)
+			ft.tween_callback(func(): flash.queue_free())
+
+	# Fase 2: INVERSIÓN (4000 - 7999)
+	elif speed >= Global.SPEED_LIMIT_1:
+		# Calcular progreso dentro de esta fase (0.0 a 1.0)
+		# No usamos el progreso para el shader, lo mantenemos invertido fijo o pulsante
+		
 		if not background.material or not background.material.shader:
 			var shader_material = ShaderMaterial.new()
 			var shader = Shader.new()
@@ -250,45 +301,81 @@ func update_background_effect(speed: float) -> void:
 			"""
 			shader_material.shader = shader
 			background.material = shader_material
+			background.material.set_shader_parameter("invert_amount", 1.0)
+			
+			# Flash al entrar en esta fase
+			var flash_tween = create_tween()
+			background.modulate = Color.WHITE
+			flash_tween.tween_property(background, "modulate", Color.WHITE * 3.0, 0.1)
+			flash_tween.tween_property(background, "modulate", Color.WHITE, 0.2)
 		
-		# Efecto de flash blanco antes del negativo
-		var flash_tween = create_tween()
-		background.modulate = Color.WHITE
-		flash_tween.tween_property(background, "modulate", Color.WHITE * 2.0, 0.1)
-		flash_tween.tween_property(background, "modulate", Color.WHITE, 0.1)
-		
-		# Aplicar inversión gradualmente
-		var invert_tween = create_tween()
-		invert_tween.tween_method(func(value): 
-			if background.material:
-				background.material.set_shader_parameter("invert_amount", value)
-		, 0.0, 1.0, 0.3)
-		
+		# Hacer que el fondo "vibre" o parpadee sutilmente en modo invertido
+		# Cambiando ligeramente el tinte
+		var pulse = (sin(Time.get_ticks_msec() / 50.0) + 1.0) * 0.5
+		var tint = lerp(Color.WHITE, Color(0.8, 0.8, 1.0), pulse * 0.3)
+		background.modulate = tint
+
+	# Fase 1: CALENTAMIENTO (3000 - 3999)
 	elif speed >= Global.MEDIUM_THRESHOLD:
 		# Fade anaranjado progresivo
+		var progress = clamp((speed - Global.MEDIUM_THRESHOLD) / (Global.SPEED_LIMIT_1 - Global.MEDIUM_THRESHOLD), 0.0, 1.0)
+		
 		if background.material:
 			background.material = null
 		
 		# Flash al entrar en zona naranja
-		if progress < 0.1:  # Solo en los primeros momentos
+		if progress < 0.1 and background.modulate == Color.WHITE:
 			var flash_tween = create_tween()
 			flash_tween.tween_property(background, "modulate", Color.WHITE * 1.5, 0.05)
 		
-		# Mezcla de blanco a naranja según progreso (más naranja = más velocidad)
-		# Naranja que se intensifica: empieza suave y termina muy intenso
 		var orange_intensity = progress
-		# R siempre en 1.0, G baja de 0.8 a 0.2, B baja de 0.4 a 0.0
 		var green_value = 0.8 - (0.6 * orange_intensity)
 		var blue_value = 0.4 - (0.4 * orange_intensity)
 		var orange_color = Color(1.0, green_value, blue_value, 1.0)
 		
 		var color_tween = create_tween()
 		color_tween.tween_property(background, "modulate", orange_color, 0.1)
+	
+	# Fase 0: NORMAL (< 3000)
 	else:
-		# Estado normal
 		if background.material:
 			background.material = null
 		background.modulate = Color.WHITE
+
+func _trigger_mega_shockwave() -> void:
+	# Crear un nodo ColorRect temporal para el shockwave de pantalla completa
+	var shockwave = ColorRect.new()
+	shockwave.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shockwave.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shockwave.z_index = 100 # Encima de todo
+	
+	var mat = ShaderMaterial.new()
+	mat.shader = load("res://assets/msc/shockwave.gdshader")
+	mat.set_shader_parameter("wave_center", Vector2(0.5, 0.5))
+	mat.set_shader_parameter("wave_strength", 0.08) # MÃ¡s fuerte
+	mat.set_shader_parameter("wave_thickness", 0.1)
+	mat.set_shader_parameter("wave_progress", 0.0)
+	
+	shockwave.material = mat
+	# Agregar a un CanvasLayer para asegurar que cubra toda la pantalla sin ser afectado por la cámara
+	var layer = CanvasLayer.new()
+	layer.layer = 100
+	add_child(layer)
+	layer.add_child(shockwave)
+	
+	var tween = create_tween()
+	tween.tween_method(func(val): mat.set_shader_parameter("wave_progress", val), 0.0, 2.0, 0.8)
+	tween.tween_callback(func(): layer.queue_free())
+	
+	# Sonido de explosión/romper barrera
+	var audio = AudioStreamPlayer.new()
+	audio.stream = load("res://sound/sfx/ball/wall_bounce_fast.wav") # Placeholder
+	audio.pitch_scale = 0.5
+	audio.bus = "SFX"
+	add_child(audio)
+	audio.play()
+	audio.finished.connect(func(): audio.queue_free())
+
 
 func reset_background_effect() -> void:
 	if not background:

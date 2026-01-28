@@ -127,7 +127,6 @@ layout_mode = 2
 theme_override_constants/separation = 200
 
 [node name="BallSpeedLabel" type="Label" parent="MarginContainer/VBoxContainer"]
-visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Velocidad Bola: 200 px/s"

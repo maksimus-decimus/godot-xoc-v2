@@ -1,12 +1,22 @@
 extends CharacterBody2D
 
-@onready var sprite = $Sprite2D
-@onready var hit_sprite = $HitSprite
+# Referencia al sprite visual (puede ser AnimatedSprite2D o Sprite2D)
+var sprite: Node2D = null
+var hit_sprite: Node2D = null
 @onready var collision_shape = $CollisionShape2D
+
+# Nodo pivote para efectos visuales (Squash & Stretch)
+var visual_pivot: Node2D = null
+var ghost_timer: float = 0.0
+const GHOST_INTERVAL: float = 0.05
 
 # Nodo de shockwave (se creará dinámicamente)
 var shockwave_node: ColorRect = null
 var shockwave_material: ShaderMaterial = null
+
+# Hit Effects Players
+var p1_hit_effect: AnimatedSprite2D = null
+var p2_hit_effect: AnimatedSprite2D = null
 
 # Arrays de variantes de sonidos
 var weak_sounds: Array[AudioStream] = []
@@ -27,6 +37,62 @@ signal ball_hit_player(player_id: int, damage: float)
 signal ball_speed_changed(new_speed: float)
 
 func _ready() -> void:
+	# Intentar encontrar el sprite correcto dinámicamente
+	if has_node("bola_animada"):
+		sprite = get_node("bola_animada")
+	elif has_node("Sprite2D"):
+		sprite = get_node("Sprite2D")
+	else:
+		# Buscar cualquier hijo que sea AnimatedSprite2D
+		for child in get_children():
+			if child is AnimatedSprite2D:
+				sprite = child
+				break
+				
+	if not sprite:
+		printerr("ERROR: No se encontró ningún nodo de sprite (bola_animada o Sprite2D) en la pelota.")
+		return
+		
+	# Intentar encontrar HitSprite de forma segura
+	if has_node("HitSprite"):
+		hit_sprite = get_node("HitSprite")
+	else:
+		# Fallback: buscar por nombre en hijos
+		hit_sprite = find_child("HitSprite", true, false)
+
+	# Buscar efectos de golpe de jugadores (con búsqueda recursiva por seguridad)
+	# Player 1 effect
+	if has_node("p1 light hit"):
+		p1_hit_effect = get_node("p1 light hit")
+	else:
+		p1_hit_effect = find_child("p1 light hit", true, false)
+		
+	if p1_hit_effect:
+		print("DEBUG: Found p1 light hit node")
+		p1_hit_effect.visible = false
+		p1_hit_effect.z_index = 10 # Asegurar que se vea encima
+		if p1_hit_effect is AnimatedSprite2D:
+			if not p1_hit_effect.animation_finished.is_connected(func(): p1_hit_effect.visible = false):
+				p1_hit_effect.animation_finished.connect(func(): p1_hit_effect.visible = false)
+	else:
+		print("DEBUG: Could NOT find 'p1 light hit' node")
+	
+	# Player 2 effect
+	if has_node("p2 light hit"):
+		p2_hit_effect = get_node("p2 light hit")
+	else:
+		p2_hit_effect = find_child("p2 light hit", true, false)
+		
+	if p2_hit_effect:
+		print("DEBUG: Found p2 light hit node")
+		p2_hit_effect.visible = false
+		p2_hit_effect.z_index = 10 # Asegurar que se vea encima
+		if p2_hit_effect is AnimatedSprite2D:
+			if not p2_hit_effect.animation_finished.is_connected(func(): p2_hit_effect.visible = false):
+				p2_hit_effect.animation_finished.connect(func(): p2_hit_effect.visible = false)
+	else:
+		print("DEBUG: Could NOT find 'p2 light hit' node")
+
 	# Cargar variantes de sonidos de golpe
 	weak_sounds.clear()
 	weak_sounds.append(load("res://sound/sfx/golpe/weak_hit.wav"))
@@ -49,19 +115,85 @@ func _ready() -> void:
 	var angle = randf_range(0, TAU)
 	direction = Vector2(cos(angle), sin(angle)).normalized()
 	velocity = direction * speed
-	# Aplicar escala
-	sprite.scale = Vector2(ball_scale, ball_scale)
-	hit_sprite.scale = Vector2(ball_scale, ball_scale)
-	hit_sprite.visible = false
+	
+	# SETUP VISUAL PIVOT
+	# Creamos un nuevo nodo Node2D que será padre del sprite
+	# Esto permite rotar el pivote hacia la dirección del movimiento (para estirar)
+	# MIENTRAS rotamos el sprite independientemente (para girar)
+	visual_pivot = Node2D.new()
+	visual_pivot.name = "VisualPivot"
+	add_child(visual_pivot)
+	
+	# Mover sprite y hit_sprite dentro del pivote
+	remove_child(sprite)
+	visual_pivot.add_child(sprite)
+	
+	if hit_sprite:
+		remove_child(hit_sprite)
+		visual_pivot.add_child(hit_sprite)
+		
+	# Mover también los efectos de golpe al pivote para que sigan la rotación visual si se desea
+	# O mantenerlos globales. Si los unimos al pivote, rotarán con el "spin" de la bola si no tenemos cuidado,
+	# pero el visual_pivot rota hacia la dirección del movimiento, lo cual es bueno.
+	# El sprite dentro rota por su cuenta.
+	# Vamos a moverlos al visual_pivot para consistencia
+	if p1_hit_effect:
+		p1_hit_effect.get_parent().remove_child(p1_hit_effect)
+		visual_pivot.add_child(p1_hit_effect)
+		
+	if p2_hit_effect:
+		p2_hit_effect.get_parent().remove_child(p2_hit_effect)
+		visual_pivot.add_child(p2_hit_effect)
+	
+	# Reproducir animación si es un AnimatedSprite2D
+	if sprite is AnimatedSprite2D:
+		if sprite.sprite_frames and sprite.sprite_frames.has_animation("default"):
+			sprite.play("default")
+	
+	# SETUP ESCALA: Usar la escala del editor como base
+	# Capturamos la escala actual del sprite para usarla como ball_scale
+	ball_scale = sprite.scale.x
+	
+	if hit_sprite:
+		hit_sprite.scale = Vector2(ball_scale, ball_scale)
+		hit_sprite.visible = false
+		
 	# Iniciar en estado neutral
 	update_tag_color()
 	
 	# Inicializar el nodo de shockwave
 	setup_shockwave()
 
-func _physics_process(delta: float) -> void:
-	# Rotar la pelota continuamente
+func _process(delta: float) -> void:
+	if not sprite or not visual_pivot:
+		return
+
+	# Rotación del sprite (Spin)
 	sprite.rotation += rotation_speed * delta
+	
+	# Squash & Stretch (Smear Effect)
+	if velocity.length() > 10:
+		# Orientar el pivote hacia la dirección del movimiento
+		visual_pivot.rotation = velocity.angle()
+		
+		# Calcular factor de estiramiento basado en la velocidad
+		# Rango: 1.0 (reposo) a 2.0 (velocidad máx)
+		var stretch_factor = 1.0 + (speed / Global.MAX_BALL_SPEED) * 0.8
+		
+		# Aplicar escala al pivote:
+		# X se estira (largo), Y se aplasta (ancho) para conservar volumen
+		visual_pivot.scale.x = stretch_factor
+		visual_pivot.scale.y = 1.0 / sqrt(stretch_factor)
+	
+	# Trail Effect (Ghosting)
+	if speed > Global.MEDIUM_THRESHOLD:
+		ghost_timer -= delta
+		if ghost_timer <= 0:
+			spawn_ghost_trail()
+			ghost_timer = GHOST_INTERVAL
+
+func _physics_process(delta: float) -> void:
+	# NOTA: La rotación visual del sprite ahora está en _process
 	
 	var collision = move_and_collide(velocity * delta)
 	
@@ -100,6 +232,53 @@ func _physics_process(delta: float) -> void:
 				audio.play()
 				# Eliminar el reproductor después de que termine
 				audio.finished.connect(func(): audio.queue_free())
+
+func spawn_ghost_trail() -> void:
+	if not sprite:
+		return
+
+	# Obtener textura del frame actual
+	var current_texture = null
+	
+	if sprite is AnimatedSprite2D and sprite.sprite_frames:
+		# Es un AnimatedSprite2D
+		current_texture = sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	elif sprite is Sprite2D:
+		# Es un Sprite2D normal
+		current_texture = sprite.texture
+	
+	if not current_texture:
+		return # No pudimos obtener textura, abortar
+		
+	var ghost = Sprite2D.new()
+	ghost.texture = current_texture
+	ghost.scale = sprite.scale # Escala base del sprite
+	ghost.global_position = global_position
+	ghost.rotation = sprite.global_rotation # Rotación real del sprite (spin)
+	ghost.modulate = sprite.modulate
+	ghost.z_index = -1 # Detrás de todo
+	
+	# Aplicar también la deformación del pivote al ghost
+	# Para simular esto simplemente escalamos el ghost en la dirección del movimiento
+	# Pero como el ghost es hijo directo del root (o world), necesitamos aplicar la transformación manualmente
+	
+	# Truco: Añadimos el ghost a la escena principal, no a la bola
+	get_parent().add_child(ghost)
+	
+	# Aplicar la misma deformación que tiene el pivote actualmente
+	var transform_matrix = visual_pivot.global_transform
+	# Extraer la escala y rotación del pivote para aplicarla visualmente al ghost
+	ghost.global_position = global_position
+	ghost.rotation = visual_pivot.global_rotation
+	ghost.scale.x = sprite.scale.x * visual_pivot.scale.x
+	ghost.scale.y = sprite.scale.y * visual_pivot.scale.y
+	
+	# Tween para desvanecer
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(ghost, "modulate:a", 0.0, 0.3)
+	tween.tween_property(ghost, "scale", ghost.scale * 0.5, 0.3)
+	tween.chain().tween_callback(func(): ghost.queue_free())
 
 func calculate_damage() -> float:
 	# DEBUG: One-hit kill mode
@@ -176,6 +355,8 @@ func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> v
 		var random_medium = medium_sounds[randi() % medium_sounds.size()]
 		audio_player.stream = random_medium
 		audio_player.play()
+		# Freeze corto para golpe medio (0.15s)
+		freeze_player(player, 0.15)
 	else:
 		# Golpe fuerte - elegir variante aleatoria
 		var random_strong = strong_sounds[randi() % strong_sounds.size()]
@@ -185,21 +366,41 @@ func play_hit_sound_by_speed(current_speed: float, player: CharacterBody2D) -> v
 		var game_manager = get_parent()
 		if game_manager and game_manager.has_method("screen_shake"):
 			game_manager.screen_shake(1.0, 30.0)
-		freeze_player(player)
+		# Freeze largo para golpe fuerte (1.15s - un segundo más que el medio)
+		freeze_player(player, 1.15)
 		# Mostrar sprite de golpe orientado según dirección
 		show_hit_effect()
 		# ¡ACTIVAR EFECTO DE SHOCKWAVE!
 		play_shockwave_effect()
 
+	# Reproducir efecto específico del jugador si existe
+	play_player_specific_hit_effect(player)
+
 func show_hit_effect() -> void:
+	if not hit_sprite:
+		return
 	# Mostrar sprite de golpe orientado según la dirección
 	hit_sprite.visible = true
 	hit_sprite.rotation = direction.angle()
 	# Ocultar después de un breve momento
 	await get_tree().create_timer(0.15).timeout
-	hit_sprite.visible = false
+	if hit_sprite:
+		hit_sprite.visible = false
 
-func freeze_player(player: CharacterBody2D) -> void:
+var current_freeze_generation: int = 0
+var currently_frozen_player: CharacterBody2D = null
+
+func freeze_player(player: CharacterBody2D, duration: float) -> void:
+	# 1. Limpiar freeze anterior si existe y es válido
+	if currently_frozen_player and is_instance_valid(currently_frozen_player):
+		_unfreeze_immediate(currently_frozen_player)
+	
+	# 2. Configurar nuevo freeze
+	current_freeze_generation += 1
+	var my_gen = current_freeze_generation
+	
+	currently_frozen_player = player
+	
 	# Congelar al jugador que golpeó fuerte
 	player.set_physics_process(false)
 	player.is_hitting = true  # Prevenir que golpee durante congelación
@@ -222,23 +423,33 @@ func freeze_player(player: CharacterBody2D) -> void:
 	
 	# Efecto de pulsación en la bola - mantener ball_scale
 	var pulse_tween = create_tween()
-	pulse_tween.set_loops(2)  # Mitad de 4 loops
-	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.3, ball_scale * 1.3), 0.125)  # 0.25 / 2
+	var loops = int(duration / 0.25)
+	if loops < 1: loops = 1
+	pulse_tween.set_loops(loops)
+	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale * 1.3, ball_scale * 1.3), 0.125)
 	pulse_tween.tween_property(sprite, "scale", Vector2(ball_scale, ball_scale), 0.125)
 	
-	# Descongelar después de 1.0 segundo (mitad de 2.0)
-	await get_tree().create_timer(1.0).timeout
+	# Descongelar después de la duración especificada
+	await get_tree().create_timer(duration).timeout
 	
+	# 3. Verificar si seguimos siendo el freeze activo
+	if current_freeze_generation == my_gen:
+		_unfreeze_immediate(player)
+		currently_frozen_player = null
+		
+		# Restaurar estado de la bola (solo si somos el freeze activo)
+		set_physics_process(true)
+		velocity = stored_velocity
+		sprite.modulate = original_ball_color
+		sprite.scale = Vector2(ball_scale, ball_scale)
+
+func _unfreeze_immediate(player: CharacterBody2D) -> void:
 	if is_instance_valid(player):
 		player.set_physics_process(true)
 		player.is_hitting = false
-		player.visual_container.modulate = original_modulate
-	
-	# Descongelar la bola y restaurar su color original del tag
-	set_physics_process(true)
-	velocity = stored_velocity
-	sprite.modulate = original_ball_color
-	sprite.scale = Vector2(ball_scale, ball_scale)
+		player.visual_container.modulate = Color.WHITE # Restaurar a normal
+		# Si quisiéramos restaurar el modulate original exacto, necesitaríamos guardarlo,
+		# pero Color.WHITE es el estándar.
 
 func reset_ball(spawn_position: Vector2) -> void:
 	global_position = spawn_position
@@ -253,16 +464,19 @@ func reset_ball(spawn_position: Vector2) -> void:
 	velocity = direction * speed
 	
 	# Volver a color neutral (blanco)
-	sprite.modulate = Color.WHITE
-	sprite.scale = Vector2(ball_scale, ball_scale)
-	hit_sprite.visible = false
+	if sprite:
+		sprite.modulate = Color.WHITE
+		sprite.scale = Vector2(ball_scale, ball_scale)
+		
+	if hit_sprite:
+		hit_sprite.visible = false
 
 func setup_shockwave() -> void:
 	# Crear el nodo de shockwave
 	shockwave_node = ColorRect.new()
 	shockwave_node.name = "ShockwaveEffect"
-	shockwave_node.size = Vector2(1000, 1000)  # Área muy grande para el efecto
-	shockwave_node.position = Vector2(-500, -500)  # Centrado en la pelota
+	shockwave_node.size = Vector2(3000, 3000)  # Área muy grande para evitar bordes visibles
+	shockwave_node.position = Vector2(-1500, -1500)  # Centrado en la pelota
 	shockwave_node.z_index = 100  # Por encima de todo
 	shockwave_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shockwave_node.visible = false
@@ -313,3 +527,29 @@ func play_shockwave_effect() -> void:
 		if shockwave_node:
 			shockwave_node.visible = false
 	)
+
+func play_player_specific_hit_effect(player: CharacterBody2D) -> void:
+	if not player:
+		return
+		
+	print("DEBUG: play_player_specific_hit_effect called for player ", player.player_id)
+		
+	var effect_to_play: AnimatedSprite2D = null
+	
+	if player.player_id == 1:
+		effect_to_play = p1_hit_effect
+	elif player.player_id == 2:
+		effect_to_play = p2_hit_effect
+		
+	if effect_to_play:
+		print("DEBUG: Playing effect for player ", player.player_id)
+		effect_to_play.visible = true
+		# Resetear rotación local y aplicar rotación global basada en dirección
+		# Como ahora son hijos de visual_pivot, su rotación es relativa al pivote.
+		# El pivote YA apunta en la dirección del movimiento (velocity.angle()) en _process
+		# Así que si ponemos rotation = 0, deberían apuntar hacia adelante (derecha del pivote).
+		effect_to_play.rotation = 0 
+		effect_to_play.frame = 0
+		effect_to_play.play()
+	else:
+		print("DEBUG: No effect found to play for player ", player.player_id)

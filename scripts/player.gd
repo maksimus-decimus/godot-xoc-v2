@@ -84,7 +84,7 @@ var sprites = {
 
 # Sprites de animación de ultimate (array de frames)
 var ultimate_frames: Array[Texture2D] = []
-
+var outline_material: ShaderMaterial
 var current_sprite_state: String = "idle"
 var has_sprites: bool = false
 
@@ -278,6 +278,59 @@ func setup_character() -> void:
 		update_sprite_state("idle")
 	
 	hp = max_hp
+	
+	setup_outline()
+
+func setup_outline() -> void:
+	if not has_sprites:
+		return
+		
+	var shader = load("res://assets/msc/outline.gdshader")
+	if not shader:
+		print("Error: No se pudo cargar outline.gdshader")
+		return
+		
+	outline_material = ShaderMaterial.new()
+	outline_material.shader = shader
+	
+	# Color según player_id: P1 Azul, P2 Rojo
+	var color = Color.DODGER_BLUE if player_id == 1 else Color.RED
+	if player_id == 2:
+		color = Color(1.0, 0.2, 0.2, 1.0) # Rojo un poco más suave para visibilidad
+		
+	outline_material.set_shader_parameter("line_color", color)
+	outline_material.set_shader_parameter("line_thickness", 1.0)
+	outline_material.set_shader_parameter("blinking", false)
+	outline_material.set_shader_parameter("blink_speed", 15.0) # Rápido para efecto de tensión
+	outline_material.set_shader_parameter("invert_colors", false)
+	
+	sprite_node.material = outline_material
+
+func set_inverted_colors(inverted: bool) -> void:
+	if outline_material:
+		outline_material.set_shader_parameter("invert_colors", inverted)
+
+func update_intensity(ball_speed: float, ball_owner_id: int) -> void:
+	if not outline_material:
+		return
+		
+	# Activar parpadeo solo si:
+	# 1. La bola va a velocidad media o alta (> 2000)
+	# 2. SOY el dueño de la bola (quien la golpeó)
+	# Esto indica que este jugador ha lanzado un ataque poderoso
+	
+	var is_intense = ball_speed >= Global.WEAK_THRESHOLD and ball_owner_id == player_id
+	
+	outline_material.set_shader_parameter("blinking", is_intense)
+	
+	# Opcional: Aumentar grosor con intensidad
+	if is_intense:
+		var thickness = 1.0
+		if ball_speed >= Global.MEDIUM_THRESHOLD: # > 3000
+			thickness = 2.0
+		outline_material.set_shader_parameter("line_thickness", thickness)
+	else:
+		outline_material.set_shader_parameter("line_thickness", 1.0)
 
 func show_jump_effect() -> void:
 	if not jump_effect:
